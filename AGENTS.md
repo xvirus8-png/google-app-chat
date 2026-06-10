@@ -11,9 +11,13 @@
 - **الأصل:** `kashf-account-original.html`
 
 ### 3. Big Pickle Chat
-- **الملف:** `big-pickle-chat.html`
+- **الملف الرئيسي:** `big-pickle-chat.html`
 - **الوصف:** تطبيق شات جوال (PWA) متصل بـ Big Pickle عبر Zen API
-- **الملفات المرتبطة:** `manifest.json`, `sw.js`
+- **الملفات المرتبطة:** `manifest.json`, `sw.js`, `bp-chat-relay.py`, `start-bp-relay.bat`
+- **الربط مع Firebase:** يستخدم Realtime Database (`/bp_chat/`) كوسيط بين التطبيق والـ relay
+- **طريقة التشغيل:** شغّل `start-bp-relay.bat` (برنامج خلفية يربط Firebase مع Zen API)
+- **الوصول:** التطبيق يشتغل من GitHub Pages على أي جهاز في البيت
+- **ملاحظة:** الـ relay يحتاج يشتغل على جهاز واحد في البيت (بالخلفية)
 
 ## Versioning Rule (لجميع المشاريع)
 - أي تعديل جديد: ارفع رقم الفيرجن من `const APP_VERSION` و `<span class="version">` في الـ bottom-bar

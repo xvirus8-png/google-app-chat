@@ -45,7 +45,6 @@ body.light{--bg:#f5f7fa;--surface:#fff;--text:#1f2a44;--sub:#6e7b96;--border:#ed
 #sendBtn{width:44px;height:44px;border:none;border-radius:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s,transform .1s}
 #sendBtn:disabled{opacity:.4;cursor:not-allowed}
 #sendBtn:active:not(:disabled){transform:scale(.92)}
-/* API Key Modal */
 #apiModal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
 #apiModal.show{display:flex}
 .modal-card{background:var(--surface);border-radius:20px;padding:24px;width:min(100%,380px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
@@ -55,13 +54,11 @@ body.light{--bg:#f5f7fa;--surface:#fff;--text:#1f2a44;--sub:#6e7b96;--border:#ed
 .modal-card input{width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--border);font-size:15px;background:var(--input-bg);color:var(--text);outline:none;direction:ltr;text-align:left}
 .modal-card input:focus{border-color:#22c55e}
 .modal-card .btn{width:100%;padding:14px;border:none;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;margin-top:16px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
-/* Toast */
 #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1f2a44;color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:99;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media(max-width:400px){.msg{max-width:92%;font-size:14px}}
-/* Code language badge */
 .code-header{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:#0a0c12;border:1px solid var(--border);border-bottom:none;border-radius:12px 12px 0 0;direction:rtl}
 .code-header span{font-size:11px;color:var(--sub);font-weight:700}
 .copy-btn{background:var(--surface);border:none;color:var(--sub);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:700}
@@ -69,7 +66,6 @@ body.light{--bg:#f5f7fa;--surface:#fff;--text:#1f2a44;--sub:#6e7b96;--border:#ed
 </head>
 <body>
 
-<!-- HEADER -->
 <div id="header">
   <div class="logo">🥒</div>
   <div class="info">
@@ -83,12 +79,10 @@ body.light{--bg:#f5f7fa;--surface:#fff;--text:#1f2a44;--sub:#6e7b96;--border:#ed
   </div>
 </div>
 
-<!-- CHAT -->
 <div id="chat">
   <div class="msg system">مرحباً بك في Big Pickle 🥒 اسألني عن أي شيء</div>
 </div>
 
-<!-- INPUT -->
 <div id="input-area">
   <div id="input-wrap">
     <button id="sendBtn" onclick="sendMsg()">⬆</button>
@@ -96,22 +90,33 @@ body.light{--bg:#f5f7fa;--surface:#fff;--text:#1f2a44;--sub:#6e7b96;--border:#ed
   </div>
 </div>
 
-<!-- API KEY MODAL -->
 <div id="apiModal">
   <div class="modal-card">
     <h2>🔑 مفتاح API</h2>
     <p>ادخل مفتاح API من <strong>opencode.ai/auth</strong><br>المفتاح يحفظ في جهازك فقط ولا يرسل لأي جهة.</p>
     <label>API Key</label>
-    <input type="password" id="apiKeyInput" placeholder="oc_..." dir="ltr" style="direction:ltr;text-align:left" autocomplete="off">
+    <input type="password" id="apiKeyInput" placeholder="sk-..." dir="ltr" style="direction:ltr;text-align:left" autocomplete="off">
     <button class="btn" onclick="saveApiKey()">حفظ</button>
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
-<script>
-const API_URL = "https://opencode.ai/zen/v1/chat/completions";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, set, onValue, remove, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyDaQ7Ur6f7_ugSTy2_u0-gPEtUsFzhh82U",
+  authDomain:"kashf-system.firebaseapp.com",
+  databaseURL:"https://kashf-system-default-rtdb.firebaseio.com",
+  projectId:"kashf-system",
+  storageBucket:"kashf-system.firebasestorage.app",
+  messagingSenderId:"987561323340",
+  appId:"1:987561323340:web:19d72fce8456f2fdf9bde9"
+});
+const db = getDatabase(app);
+
 const MODEL = "big-pickle";
 const STORAGE_KEY = "bp_chat_history";
 const KEY_STORAGE = "bp_api_key";
@@ -119,14 +124,15 @@ const KEY_STORAGE = "bp_api_key";
 let apiKey = localStorage.getItem(KEY_STORAGE) || "";
 let messages = [];
 let isSending = false;
+let currentRequestKey = null;
+let currentListener = null;
+let requestTimeout = null;
 
-// Elements
 const chat = document.getElementById("chat");
 const input = document.getElementById("msgInput");
 const sendBtn = document.getElementById("sendBtn");
 const toast = document.getElementById("toast");
 
-// Init
 loadHistory();
 if (!apiKey) {
   setTimeout(showApiModal, 500);
@@ -149,7 +155,6 @@ function saveApiKey() {
   showToast("✅ تم حفظ المفتاح");
 }
 
-// Theme
 function toggleTheme() {
   const isLight = document.body.classList.toggle("light");
   document.querySelector(".hdr-btn[onclick*='toggleTheme']").textContent = isLight ? "🌙" : "☀️";
@@ -163,7 +168,6 @@ function initTheme() {
 }
 initTheme();
 
-// Chat
 function addMsg(role, content) {
   const div = document.createElement("div");
   div.className = "msg " + role;
@@ -182,7 +186,6 @@ function addSystem(text) {
 }
 
 function formatContent(text) {
-  // Code blocks with copy
   return text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
     const trimmed = code.replace(/\n$/, "");
     const langLabel = lang || "code";
@@ -233,51 +236,67 @@ async function sendMsg() {
   sendBtn.disabled = true;
 
   try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + apiKey
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: "system", content: "أنت مساعد ذكي اسمك Big Pickle. ردودك بالعربية دقيقة ومفيدة. تساعد في البرمجة والإجابة على الأسئلة." },
-          ...messages.slice(-20)
-        ],
-        temperature: 0.7,
-        max_tokens: 4096
-      })
+    const payload = {
+      messages: [
+        { role: "system", content: "أنت مساعد ذكي اسمك Big Pickle. ردودك بالعربية دقيقة ومفيدة. تساعد في البرمجة والإجابة على الأسئلة." },
+        ...messages.slice(-20)
+      ],
+      apiKey: apiKey,
+      status: "pending",
+      timestamp: Date.now()
+    };
+
+    const newRef = push(ref(db, "bp_chat"), payload);
+    currentRequestKey = newRef.key;
+
+    requestTimeout = setTimeout(() => {
+      if (currentListener) {
+        currentListener();
+        currentListener = null;
+      }
+      const sysMsgs = chat.querySelectorAll(".msg.system");
+      if (sysMsgs.length > 0) sysMsgs[sysMsgs.length - 1].remove();
+      addMsg("bot", "⚠️ لم يتم الرد - تأكد من تشغيل bp-chat-relay.py");
+      isSending = false;
+      sendBtn.disabled = false;
+      currentRequestKey = null;
+    }, 120000);
+
+    currentListener = onValue(ref(db, "bp_chat/" + currentRequestKey), (snapshot) => {
+      const data = snapshot.val();
+      if (!data || data.status !== "done") return;
+
+      if (requestTimeout) { clearTimeout(requestTimeout); requestTimeout = null; }
+
+      const sysMsgs = chat.querySelectorAll(".msg.system");
+      if (sysMsgs.length > 0) sysMsgs[sysMsgs.length - 1].remove();
+
+      if (data.error) {
+        addMsg("bot", "⚠️ " + data.error);
+      } else if (data.response) {
+        addMsg("bot", data.response);
+        messages.push({ role: "assistant", content: data.response });
+        saveHistory();
+      }
+
+      remove(ref(db, "bp_chat/" + currentRequestKey));
+      currentRequestKey = null;
+      currentListener = null;
+      isSending = false;
+      sendBtn.disabled = false;
+      input.focus();
     });
-
-    // Remove "جاري الرد..."
-    const sysMsgs = chat.querySelectorAll(".msg.system");
-    if (sysMsgs.length > 0) sysMsgs[sysMsgs.length - 1].remove();
-
-    if (!res.ok) {
-      const errText = await res.text();
-      addMsg("bot", "⚠️ خطأ: " + (res.status === 401 ? "المفتاح غير صحيح" : "فشل الاتصال (" + res.status + ")"));
-      return;
-    }
-
-    const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content || "عذراً، ما حصلت على رد.";
-    addMsg("bot", reply);
-    messages.push({ role: "assistant", content: reply });
-    saveHistory();
 
   } catch (e) {
     const sysMsgs = chat.querySelectorAll(".msg.system");
     if (sysMsgs.length > 0) sysMsgs[sysMsgs.length - 1].remove();
-    addMsg("bot", "⚠️ خطأ اتصال: " + e.message);
-  } finally {
+    addMsg("bot", "⚠️ خطأ: " + e.message);
     isSending = false;
     sendBtn.disabled = false;
     input.focus();
   }
 }
 
-// Load / Save history
 function saveHistory() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-50)));
@@ -301,7 +320,6 @@ function clearChat() {
   localStorage.removeItem(STORAGE_KEY);
 }
 
-// Input
 function handleKey(e) {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -314,14 +332,6 @@ function autoResize(el) {
 }
 input.focus();
 
-// Check for file:// protocol
-if (location.protocol === "file:") {
-  document.addEventListener("DOMContentLoaded", () => {
-    addSystem("⚠️ الملف مفتوح محلياً. استخدم السيرفر: `python -m http.server 8080` في مجلد GOOGLE APP، أو افتح http://localhost:8080/big-pickle-chat.html");
-  });
-}
-
-// Toast
 function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add("show");
@@ -329,20 +339,26 @@ function showToast(msg) {
   window._tt = setTimeout(() => toast.classList.remove("show"), 2500);
 }
 
-// Close modal on overlay click
 document.getElementById("apiModal").addEventListener("click", function(e) {
   if (e.target === this) hideApiModal();
 });
-
-// On Enter in API input
 document.getElementById("apiKeyInput").addEventListener("keydown", function(e) {
   if (e.key === "Enter") saveApiKey();
 });
 
-// Register Service Worker for PWA
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
 }
+
+window.showApiModal = showApiModal;
+window.hideApiModal = hideApiModal;
+window.saveApiKey = saveApiKey;
+window.toggleTheme = toggleTheme;
+window.sendMsg = sendMsg;
+window.clearChat = clearChat;
+window.handleKey = handleKey;
+window.autoResize = autoResize;
+window.copyCode = copyCode;
 </script>
 </body>
 </html>
