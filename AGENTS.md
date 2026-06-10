@@ -35,6 +35,14 @@
 ## Fixed Issues
 - White empty space at bottom: `padding-bottom:90px` تم إزالته، أضفنا `div` spacer و `min-height:100dvh`
 
+## Big Pickle Chat - Infrastructure
+- **Flow:** GitHub Pages (HTML) ↔ Firebase RTDB ↔ bp-chat-relay.py (local) ↔ Zen API
+- **Firebase path:** `/bp_chat/{pushId}` — request: `{messages, apiKey, status:"pending"}`, response: `{response, status:"done"}`
+- **Relay:** يفحص Firebase كل 2 ثانية، يعالج الطلبات الجديدة، يكتب الرد
+- **CORS:** تم تجاوزه باستخدام Firebase كوسيط (بدلاً من fetch المباشر)
+- **Timeout:** 120 ثانية للرد، يعرض رسالة خطأ إن لم يجب الـ relay
+- **Security:** apiKey يُمسح من Firebase بعد المعالجة
+
 ## Startup
 - شغّل opencode من مجلد `C:\Users\medo2\Desktop\GOOGLE APP` عشان يقرا `opencode.json` و `AGENTS.md`
 - الأمر: `cd C:\Users\medo2\Desktop\GOOGLE APP` ثم `opencode`

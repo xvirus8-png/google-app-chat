@@ -30,12 +30,13 @@ v4 (10 يونيو 2026)
 
 == Big Pickle Chat ==
 
-v1 (10 يونيو 2026)
-- إنشاء تطبيق شات جوال (PWA) متصل بـ Big Pickle عبر Zen API
-- دعم RTL العربي، Dark/Light mode
-- حفظ المحادثة في localStorage
-- إرسال code blocks مع زر نسخ
-- ملف manifest.json + sw.js لدعم PWA
+v4 (11 يونيو 2026)
+- تغيير طريقة الاتصال: استخدام Firebase RTDB بدلاً من fetch المباشر
+- إنشاء bp-chat-relay.py: برنامج خلفية يربط Firebase مع Zen API
+- إنشاء start-bp-relay.bat: اختصار تشغيل الـ relay
+- التطبيق يشتغل من GitHub Pages (بدون CORS)
+- إضافة مهلة 120 ثانية للرد (timeout) مع رسالة خطأ واضحة
+- مسح apiKey من Firebase بعد معالجة الرد
 
 v3 (10 يونيو 2026)
 - إضافة showLogin() للـ error recovery
@@ -47,7 +48,8 @@ v2 (10 يونيو 2026)
 - إعادة openPreview الأصلي
 
 v1 (10 يونيو 2026)
-- تنظيف الكود وإضافة الميزات
-- تحويل الحذف من Firebase إلى Google Drive API مباشرة
-- تغيير الـ scope من drive.readonly إلى drive
-- جعل التوكن دائم (بدون expiry)
+- إنشاء تطبيق شات جوال (PWA) متصل بـ Big Pickle عبر Zen API
+- دعم RTL العربي، Dark/Light mode
+- حفظ المحادثة في localStorage
+- إرسال code blocks مع زر نسخ
+- ملف manifest.json + sw.js لدعم PWA
