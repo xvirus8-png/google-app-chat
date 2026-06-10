@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>كشف حساب</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="كشف حساب">
+  <meta name="theme-color" content="#0d6efd">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:system-ui;overflow-x:hidden;transition:background .3s,color .3s}
+
+/* ===== CSS VARIABLES ===== */
+:root{
+  --bg:#f5f7fa;--card:#fff;--shadow:0 8px 25px rgba(0,0,0,.06);
+  --text:#1f2a44;--sub:#6e7b96;--border:#edf2ff;
+  --primary:#0d6efd;--pl:#eef4ff;--pb:#dbe4ff;
+  --bottom:rgba(255,255,255,.88);--input-bg:#fff;--input-border:#ddd;
+  --mini-bg:#eef1f5;--mini-color:#222;
+  --sidebar-bg:#fff;--sidebar-item:#f7f8fb;
+  --search-bg:#fff;--history-bg:#f8fbff;
+}
+body.dark{
+  --bg:#0f1117;--card:#1a1d27;--shadow:0 8px 25px rgba(0,0,0,.3);
+  --text:#e2e8f0;--sub:#8896b0;--border:#2a3456;
+  --pl:#161926;--pb:#2a3456;
+  --bottom:rgba(15,17,23,.94);--input-bg:#1a1d27;--input-border:#2e3348;
+  --mini-bg:#1e2236;--mini-color:#c8d3e8;
+  --sidebar-bg:#1a1d27;--sidebar-item:#161926;
+  --search-bg:#0f1117;--history-bg:#161926;
+}
+
+.container{max-width:600px;margin:auto;padding:15px}
+
+/* PAGES */
+.app-page{display:none;height:100vh;overflow:hidden}
+.app-page.active{display:block}
+#pageFiles.active{overflow-y:auto}
+
+/* ===== PAGE MAIN ===== */
+#pageMain{overflow:hidden;padding-bottom:120px}
+#pageMain .container{height:100%;overflow:hidden}
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.top-bar h1{font-size:22px;font-weight:800;color:var(--text)}
+.top-bar-left{display:flex;align-items:center;gap:10px}
+.top-bar-right{display:flex;align-items:center;gap:8px}
+.menu-btn,.dark-toggle{width:45px;height:45px;border:none;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-size:22px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;transition:background .3s}
+.logo{width:45px;height:45px;border-radius:50%;background:#0d6efd;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px}
+.card{background:var(--card);padding:18px;border-radius:18px;box-shadow:var(--shadow);margin-bottom:15px;transition:background .3s}
+.section-title{font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:6px;color:var(--text)}
+.input-group{margin-bottom:15px}
+.input-group label{display:block;font-weight:700;margin-bottom:6px;font-size:14px;color:var(--text)}
+.input-group input,.input-group select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--input-border);font-size:16px;background:var(--input-bg);color:var(--text);transition:background .3s,color .3s}
+.year-row{display:flex;gap:10px;align-items:center}.year-row select{flex:1}
+.quick-brands{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
+.brand-btn{padding:6px;border-radius:14px;border:2px solid var(--input-border);background:var(--card);color:var(--text);font-weight:800;font-size:16px;cursor:pointer;height:38px;display:flex;align-items:center;justify-content:center;transition:background .3s,color .3s}
+.brand-btn.active{background:#0d6efd;color:#fff;border-color:#0d6efd}
+.info-box{background:linear-gradient(135deg,var(--pl),var(--pl));padding:14px;border-radius:16px;margin-top:10px;border:1.5px solid var(--pb);box-shadow:0 8px 22px rgba(13,110,253,.08)}
+.info-row{display:flex;justify-content:space-between;margin-bottom:8px;gap:10px;color:var(--text)}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bottom);border-top:1px solid var(--border);padding:12px;z-index:10;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 -8px 24px rgba(0,0,0,.05);transition:background .3s}
+.bottom-wrap{max-width:600px;margin:auto;display:flex;gap:10px}
+.btn{flex:1;padding:14px;border:none;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer}
+.btn-primary{background:#0d6efd;color:#fff;box-shadow:0 10px 24px rgba(13,110,253,.24)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:var(--pl);color:#0d6efd;border:1.5px solid var(--pb);box-shadow:0 8px 22px rgba(13,110,253,.08);transition:background .3s}
+.btn-danger{background:linear-gradient(135deg,#ef4444,#fb7185);color:#fff;box-shadow:0 8px 20px rgba(239,68,68,.25)}
+.year-btn-save{width:48px;height:48px;border:none;border-radius:12px;background:linear-gradient(135deg,#0d6efd,#0b5ed7);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 18px rgba(13,110,253,.20);flex:0 0 48px}
+
+/* SIDEBAR */
+.sidebar-overlay{position:fixed;top:0;right:0;left:0;bottom:0;background:rgba(0,0,0,.35);z-index:1000;display:none;backdrop-filter:blur(3px)}
+.sidebar{position:fixed;top:0;right:-280px;width:280px;height:100%;background:var(--sidebar-bg);z-index:1001;padding:20px;box-shadow:-4px 0 16px rgba(0,0,0,.12);transition:right .32s cubic-bezier(.22,1,.36,1),background .3s}
+.sidebar.open{right:0}.sidebar-overlay.show{display:block}
+.sidebar-title{font-size:20px;font-weight:800;margin-bottom:20px;color:var(--text)}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:14px;border-radius:12px;background:var(--sidebar-item);margin-bottom:10px;cursor:pointer;font-weight:700;color:var(--text);transition:background .3s}
+.sidebar-item i{font-size:20px;color:#0d6efd}.hidden-file{display:none}
+
+/* STATUS */
+#statusText{font-weight:700;margin-bottom:10px;transition:.2s ease}
+.status-track{position:relative;width:100%;height:10px;background:var(--border);border-radius:999px;overflow:hidden}
+#statusBar{width:0%;height:100%;background:linear-gradient(90deg,#0d6efd,#6ea8fe,#0d6efd);background-size:200% 100%;transition:width .45s ease;position:relative;animation:barFlow 2.2s linear infinite}
+#statusBar::after{content:"";position:absolute;top:0;left:-35%;width:35%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);animation:barShine 1.8s linear infinite}
+#statusLog div{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:12px;margin-bottom:6px;font-size:14px;font-weight:600;box-shadow:0 4px 10px rgba(0,0,0,.04);opacity:0;transform:translateY(-6px);animation:fadeSlide .3s ease forwards}
+#statusCard.processing{border:1px solid var(--pb);box-shadow:0 10px 28px rgba(13,110,253,.10);animation:statusBreath 1.7s ease-in-out infinite}
+#statusCard.done{border:1px solid #d9fbe6;box-shadow:0 10px 28px rgba(34,197,94,.12)}
+#statusCard.error{border:1px solid #ffd5d5;box-shadow:0 10px 28px rgba(220,38,38,.12)}
+#statusOverlay{position:fixed;inset:0;display:none;align-items:flex-start;justify-content:center;padding-top:90px;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);z-index:3000}
+#statusOverlay.show{pointer-events:auto;display:flex}
+#statusOverlay .overlay-card{width:min(92%,560px);animation:overlaySlideUp .3s ease}
+.success-check{font-size:42px;text-align:center;margin-bottom:10px}
+
+/* SEARCH OVERLAY */
+#searchOverlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--search-bg);z-index:999;padding:15px;opacity:0;visibility:hidden;transform:translateY(18px) scale(.985);transition:opacity .28s ease,transform .32s cubic-bezier(.22,1,.36,1),visibility .28s ease,background .3s;overflow-y:auto}
+#searchOverlay.show{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.search-top{display:flex;gap:10px;margin-bottom:12px}
+#searchInput{flex:1;padding:14px 16px;border-radius:16px;border:1.5px solid var(--pb);font-size:16px;background:var(--pl);color:var(--text);outline:none;box-shadow:0 8px 22px rgba(13,110,253,.08);transition:background .3s,color .3s}
+#searchResults{max-height:52vh;overflow:auto;border-radius:14px}
+.search-item{padding:12px 14px;border:1px solid var(--border);border-radius:14px;cursor:pointer;font-size:15px;line-height:1.2;background:var(--card);margin-bottom:8px;color:var(--text);transition:background .3s}
+.search-item.select-mode{display:flex;align-items:center;gap:10px}.search-item-name{flex:1}.search-checkbox{width:20px;height:20px;accent-color:#0d6efd}
+.search-brand-box{background:var(--pl);border:1.5px solid var(--pb);padding:12px 14px;border-radius:16px;margin-bottom:12px;font-weight:800;color:#0d6efd;box-shadow:0 8px 22px rgba(13,110,253,.08);transition:background .3s}
+.search-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+#selectionTools{display:flex;gap:8px;flex-wrap:wrap}
+.mini-btn{border:none;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:800;cursor:pointer;background:var(--mini-bg);color:var(--mini-color);transition:background .3s}
+.mini-btn.primary{background:#0d6efd;color:#fff}.mini-btn.danger{background:#fbe7e7;color:#b42318}
+body.dark .mini-btn.danger{background:#2d1515;color:#f87171}
+.selected-count-box{background:var(--mini-bg);border:1px solid var(--border);padding:10px 12px;border-radius:12px;margin-bottom:10px;font-weight:800;color:var(--text);transition:background .3s}
+.bulk-send-bar{position:sticky;bottom:0;background:var(--search-bg);padding-top:12px;margin-top:12px;transition:background .3s}
+#searchHistoryBox{background:var(--history-bg);border:1.5px solid var(--pb);border-radius:14px;padding:10px;margin-bottom:10px;width:100%;transition:background .3s}
+.history-item{padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--border);margin-bottom:7px;font-weight:800;cursor:pointer;color:var(--text);transition:background .3s}
+.history-item:active{transform:scale(.98)}
+
+/* ===== PAGE FILES (local) ===== */
+#pageFiles{overflow-y:auto}
+.files-page-top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.files-back-btn{width:46px;height:46px;border:none;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-size:20px;cursor:pointer;color:var(--text)}
+.files-title{font-size:22px;font-weight:800;color:var(--text)}
+.files-tools{display:flex;gap:10px;margin-bottom:14px}.files-tools .btn{flex:1}
+.hidden-native-input{display:none}
+#filesPageList{margin-top:12px}
+.file-empty{background:var(--card);border-radius:16px;padding:18px;text-align:center;color:var(--sub);font-weight:700;box-shadow:var(--shadow)}
+.file-row-card{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;border:1px solid var(--border);cursor:pointer;transition:background .3s}
+.file-row-check{width:20px;height:20px;accent-color:#0d6efd}
+.file-row-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex:0 0 42px}
+.file-row-info{flex:1;min-width:0}
+.file-row-name{font-size:14px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.file-row-meta{font-size:12px;color:var(--sub)}
+
+/* ===== PAGE DRIVE ===== */
+#pageDrive{
+  position:fixed !important;
+  top:0 !important;
+  left:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  overflow-y:scroll !important;
+  -webkit-overflow-scrolling:touch !important;
+  z-index:200 !important;
+  background:var(--bg) !important;
+  height:100% !important;
+  display:none !important;
+}
+#pageDrive.active{display:block !important}
+#pageDrive .container{padding-bottom:120px}
+.drive-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.drive-top-left{display:flex;align-items:center;gap:8px}
+.drive-back-btn{width:42px;height:42px;border:none;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-size:18px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center}
+.drive-title{font-size:20px;font-weight:800;color:var(--text)}
+.refresh-badge{font-size:11px;font-weight:700;color:var(--sub);padding:4px 8px;border-radius:8px;background:var(--pl);border:1px solid var(--pb)}
+#driveSearchBar{display:none;margin-bottom:10px;gap:8px}
+#driveSearchBar.show{display:flex}
+#driveSearchInput{flex:1;padding:11px 14px;border-radius:12px;border:1.5px solid var(--pb);font-size:15px;background:var(--input-bg);color:var(--text);outline:none;transition:background .3s,color .3s}
+.clear-btn{width:42px;height:42px;border:none;border-radius:12px;background:var(--pl);color:#0d6efd;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--pb);flex:0 0 42px}
+#driveStatsBar{display:none;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+#driveStatsBar.show{display:flex}
+.stat-badge{font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px;background:var(--pl);color:#0d6efd;border:1px solid var(--pb)}
+#driveToolbar{display:none;margin-bottom:10px;gap:8px;flex-wrap:wrap;align-items:center}
+#driveToolbar.show{display:flex}
+.drive-mini-btn{border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800;cursor:pointer;background:var(--pl);color:#0d6efd;border:1px solid var(--pb)}
+.drive-sel-count{font-size:13px;font-weight:800;color:var(--sub);padding:9px 4px}
+#driveBreadcrumb{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;min-height:28px}
+.crumb{font-size:13px;font-weight:700;color:#0d6efd;cursor:pointer;padding:4px 8px;border-radius:8px;background:var(--pl);border:1px solid var(--pb)}
+.crumb-sep{color:var(--sub);font-size:12px}
+#driveLoginCard{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center}
+.login-icon{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#4285f4,#34a853);display:flex;align-items:center;justify-content:center;font-size:38px;margin-bottom:8px}
+.login-title{font-size:20px;font-weight:800;color:var(--text)}
+.login-sub{font-size:14px;color:var(--sub);max-width:260px;line-height:1.6}
+.google-btn{display:flex;align-items:center;gap:10px;padding:14px 24px;border-radius:16px;border:none;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);font-size:16px;font-weight:700;cursor:pointer;color:#1f2a44}
+.google-btn img{width:22px;height:22px}
+#driveFilesList{padding-bottom:80px}
+.file-card{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;border:1.5px solid var(--border);cursor:pointer;transition:background .3s,border-color .3s}
+.file-card.selected{border-color:#0d6efd;background:var(--pl)}
+.file-check{width:20px;height:20px;accent-color:#0d6efd;flex:0 0 20px}
+.file-icon-wrap{position:relative;flex:0 0 42px}
+.drive-file-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#ef4444,#fb7185);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+.drive-file-icon.folder{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
+.preload-badge{position:absolute;bottom:-3px;right:-3px;width:15px;height:15px;border-radius:50%;background:#16a34a;border:2px solid var(--card);align-items:center;justify-content:center;font-size:8px;color:#fff;display:none}
+.file-card.preloaded .preload-badge{display:flex}
+.drive-file-info{flex:1;min-width:0}
+.drive-file-name-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;min-width:0}
+.drive-file-name{font-size:14px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.drive-brand-badge{font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;white-space:nowrap;flex:0 0 auto}
+.drive-file-meta{font-size:12px;color:var(--sub)}
+.file-arrow{color:var(--sub);font-size:16px}
+.open-btn{width:36px;height:36px;border:none;border-radius:10px;background:var(--pl);color:#0d6efd;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--pb);flex:0 0 36px}
+.skeleton{background:var(--card);border-radius:16px;height:66px;margin-bottom:10px;overflow:hidden;position:relative}
+.skeleton::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 25%,rgba(150,150,150,.08) 50%,transparent 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+.drive-empty{background:var(--card);border-radius:16px;padding:32px;text-align:center;color:var(--sub);font-weight:700;box-shadow:var(--shadow)}
+
+/* CONFIRM & PROGRESS */
+#driveConfirmOverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:6000;display:none;align-items:center;justify-content:center}
+#driveConfirmOverlay.show{display:flex}
+.confirm-card{background:var(--card);border-radius:20px;padding:24px;width:min(90%,360px);box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+.confirm-title{font-size:18px;font-weight:800;margin-bottom:8px;color:var(--text)}
+.confirm-sub{font-size:13px;color:var(--sub);margin-bottom:16px;line-height:1.6}
+.confirm-files{background:var(--bg);border-radius:12px;padding:10px;margin-bottom:16px;max-height:150px;overflow-y:auto;text-align:right}
+.confirm-file-item{font-size:13px;font-weight:700;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border)}
+.confirm-file-item:last-child{border-bottom:none}
+.confirm-btns{display:flex;gap:10px}
+.confirm-btn{flex:1;padding:13px;border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer}
+.confirm-btn.ok{background:#0d6efd;color:#fff}
+.confirm-btn.cancel{background:var(--pl);color:#0d6efd;border:1px solid var(--pb)}
+#driveProgressOverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);z-index:5000;display:none;align-items:center;justify-content:center}
+#driveProgressOverlay.show{display:flex}
+.progress-card{background:var(--card);border-radius:20px;padding:24px;width:min(90%,380px);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.progress-title{font-size:17px;font-weight:800;margin-bottom:16px;color:var(--text)}
+.progress-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text)}
+.progress-item:last-child{border-bottom:none}
+.p-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 28px}
+.p-icon.done{background:#ecfdf3;color:#16a34a}.p-icon.loading{background:#eef4ff;color:#0d6efd;animation:spin .8s linear infinite}
+.p-icon.error{background:#fef2f2;color:#dc2626}.p-icon.retry{background:#fff8e1;color:#d97706}
+.p-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p-status{font-size:11px;color:var(--sub)}
+.progress-bar-wrap{margin-top:16px}
+.progress-bar-track{height:8px;background:var(--border);border-radius:999px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#0d6efd,#6ea8fe);border-radius:999px;transition:width .4s ease}
+.progress-summary{font-size:13px;font-weight:700;color:var(--sub);margin-top:8px;text-align:center}
+.progress-close{width:100%;padding:12px;border:none;border-radius:12px;background:#0d6efd;color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin-top:16px;display:none}
+
+/* TOAST */
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#1f2a44;color:#fff;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ANIMATIONS */
+.eye{display:inline-block;animation:blinkEye 6s infinite}
+.excel-ready{animation:excelPulse 1.2s infinite}
+#voiceBtn.recording{background:#ef4444 !important;color:#fff !important;animation:voicePulse 1s infinite}
+@keyframes overlaySlideUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeSlide{to{opacity:1;transform:translateY(0)}}
+@keyframes barShine{0%{left:120%}100%{left:-35%}}
+@keyframes barFlow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes statusBreath{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-1px) scale(1.01)}}
+@keyframes blinkEye{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(0.1)}}
+@keyframes excelPulse{0%{transform:scale(1)}50%{transform:scale(1.06);box-shadow:0 0 18px rgba(13,110,253,.35)}100%{transform:scale(1)}}
+@keyframes voicePulse{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- ==================== PAGE MAIN ==================== -->
+<div id="pageMain" class="app-page active">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-title">القائمة</div>
+    <div class="sidebar-item" onclick="document.getElementById('excelFile').click();toggleSidebar()"><i class="bi bi-file-earmark-excel"></i><span>استيراد Excel</span></div>
+    <div class="sidebar-item" onclick="restartBayanFromWeb();toggleSidebar()"><i class="bi bi-arrow-clockwise"></i><span>إعادة تشغيل البيان</span></div>
+    <div class="sidebar-item" onclick="deleteSavedData();toggleSidebar()"><i class="bi bi-trash3"></i><span>حذف البيانات</span></div>
+    <input type="file" id="excelFile" class="hidden-file" accept=".xlsx,.xls">
+  </div>
+
+  <div class="container">
+    <div class="top-bar">
+      <div class="top-bar-left"><button class="menu-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i></button><h1>طلب كشف حساب</h1></div>
+      <div class="top-bar-right">
+        <button class="dark-toggle" id="darkToggleBtn" onclick="toggleDarkMode()">🌙</button>
+        <div class="logo"><i class="bi bi-receipt"></i></div>
+      </div>
+    </div>
+
+    <!-- زر صفحة الملفات المحلية -->
+    <div class="card" style="padding:14px;margin-bottom:15px;cursor:pointer;" onclick="openShortcutPDF()">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#0d6efd,#4f8cff);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;"><i class="bi bi-folder2-open"></i></div>
+        <div><div style="font-weight:800;font-size:16px;margin-bottom:4px;color:var(--text)">صفحة الملفات</div><div style="font-size:13px;color:var(--sub)">استعراض الملفات وتحديدها وإرسال المحدد</div></div>
+      </div>
+    </div>
+
+    <!-- زر صفحة Google Drive -->
+    <div class="card" style="padding:14px;margin-bottom:15px;cursor:pointer;" onclick="openDrivePage()">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#34a853,#4fc76a);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;"><i class="bi bi-cloud-fill"></i></div>
+        <div><div style="font-weight:800;font-size:16px;margin-bottom:4px;color:var(--text)">Google Drive</div><div style="font-size:13px;color:var(--sub)">استعراض ملفات Drive وإرسالها مباشرة</div></div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>اختر السنة</label>
+      <div class="year-row">
+        <select id="yearSelect">
+          <option value="2020">2020</option><option value="2021">2021</option><option value="2022">2022</option><option value="2023">2023</option>
+          <option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option>
+        </select>
+        <button type="button" class="year-btn-save" onclick="sendYearToFirebase()"><i class="bi bi-check2-circle"></i></button>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>اختر البراند</label>
+      <div class="quick-brands">
+        <button type="button" class="brand-btn" onclick="setBrand('FOREVER',this)">FOREVER</button>
+        <button type="button" class="brand-btn" onclick="setBrand('CHARACTER',this)">CHARACTER</button>
+        <button type="button" class="brand-btn" onclick="setBrand('ROSELLA',this)">ROSELLA</button>
+        <button type="button" class="brand-btn active" onclick="setBrand('ALL',this)">الكل</button>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>اسم الزبون</label>
+      <input type="text" id="customerName" placeholder="اضغط للبحث" onclick="openSearch()" readonly>
+    </div>
+
+    <div class="section-title">المعاينة <span class="eye">👁️</span></div>
+    <div class="info-box">
+      <div class="info-row"><div>البراند</div><div id="previewBrand">—</div></div>
+      <div class="info-row"><div>اسم الزبون</div><div id="previewCustomer">—</div></div>
+    </div>
+
+    <div id="statusOverlay">
+      <div class="overlay-card">
+        <div id="statusCard" class="card" style="display:block;">
+          <div id="successIcon" style="display:none;" class="success-check">✅</div>
+          <div class="section-title"><i class="bi bi-hourglass-split"></i> حالة الطلب</div>
+          <div id="statusText">جاري إرسال الطلب...</div>
+          <div id="statusLog" style="font-size:14px;line-height:1.8;margin-bottom:10px;color:#444;"></div>
+          <div class="status-track"><div id="statusBar"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="bottom-wrap">
+      <button class="btn btn-secondary" onclick="deleteAllFiles()">🗑️ حذف الملفات</button>
+      <button class="btn btn-primary" id="submitBtn" onclick="submitRequest()">إرسال الطلب</button>
+    </div>
+  </div>
+
+  <div id="searchOverlay">
+    <div class="search-brand-box" id="searchBrandTitle">البراند: —</div>
+    <div class="search-top">
+      <input type="text" id="searchInput" placeholder="ابحث عن اسم الزبون">
+      <button type="button" id="voiceBtn" class="btn btn-secondary" style="flex:0 0 auto;padding:12px 14px" onclick="startVoiceSearch()">🎤</button>
+      <button class="btn btn-secondary" style="flex:0 0 auto;padding:12px 16px" onclick="closeSearch()">إلغاء</button>
+    </div>
+    <div class="search-actions">
+      <button type="button" class="mini-btn" onclick="toggleSearchHistory()">آخر 10 عمليات بحث</button>
+      <button type="button" class="mini-btn primary" id="startSelectBtn" onclick="startSelectionMode()">تحديد</button>
+      <div id="selectionTools" style="display:none;">
+        <button type="button" class="mini-btn" onclick="selectAllVisible()">تحديد الكل</button>
+        <button type="button" class="mini-btn" onclick="clearSelectedCustomers()">إلغاء التحديد</button>
+        <button type="button" class="mini-btn danger" onclick="endSelectionMode()">إنهاء</button>
+      </div>
+      <div id="searchHistoryBox" style="display:none;"></div>
+    </div>
+    <div id="selectedCountBox" class="selected-count-box" style="display:none;">عدد المحددين: <span id="selectedCount">0</span></div>
+    <div id="searchResults"></div>
+    <div id="bulkSendBar" class="bulk-send-bar" style="display:none;">
+      <button type="button" class="btn btn-primary" id="bulkSendBtn" onclick="sendSelectedCustomers()">إرسال المحددين (<span id="bulkCount">0</span>)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAGE FILES (local) ==================== -->
+<div id="pageFiles" class="app-page">
+  <div class="container">
+    <div class="files-page-top"><button class="files-back-btn" onclick="showPage('pageMain')"><i class="bi bi-arrow-right"></i></button><div class="files-title">الملفات</div></div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="section-title"><i class="bi bi-folder2-open"></i> إدارة الملفات</div>
+      <div style="font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:12px;">اختر ملفات من الجهاز أو Google Drive أو iCloud، وبعدها تگدر تحددها وترسل المحدد.</div>
+      <div class="files-tools"><button class="btn btn-primary" type="button" onclick="openFilesPickerPage()">اختيار ملفات</button><button class="btn btn-secondary" type="button" onclick="openFolderPickerPage()">اختيار مجلد</button></div>
+      <div class="files-tools"><button class="btn btn-secondary" type="button" onclick="selectAllPickedFiles()">تحديد الكل</button><button class="btn btn-secondary" type="button" onclick="clearPickedSelection()">إلغاء التحديد</button></div>
+      <div class="files-tools"><button class="btn btn-secondary" type="button" onclick="clearPickedFiles()">مسح القائمة</button></div>
+      <input type="file" id="filesPageInput" class="hidden-native-input" multiple>
+      <input type="file" id="folderPageInput" class="hidden-native-input" webkitdirectory multiple>
+      <div id="filesPageList" class="file-empty">ماكو ملفات مختارة حالياً</div>
+    </div>
+  </div>
+  <div class="bottom-bar"><div class="bottom-wrap"><button class="btn btn-primary" type="button" id="sendPickedFilesBtn" onclick="sendPickedFiles()" disabled>إرسال المحدد</button></div></div>
+</div>
+
+<!-- ==================== PAGE DRIVE ==================== -->
+<div id="pageDrive" class="app-page">
+  <!-- Confirm -->
+  <div id="driveConfirmOverlay">
+    <div class="confirm-card">
+      <div class="confirm-title">📤 تأكيد الإرسال</div>
+      <div class="confirm-sub" id="driveConfirmSub"></div>
+      <div class="confirm-files" id="driveConfirmList"></div>
+      <div class="confirm-btns">
+        <button class="confirm-btn cancel" onclick="driveCloseConfirm()">إلغاء</button>
+        <button class="confirm-btn ok" onclick="driveDoSend()">إرسال</button>
+      </div>
+    </div>
+  </div>
+  <!-- Progress -->
+  <div id="driveProgressOverlay">
+    <div class="progress-card">
+      <div class="progress-title" id="driveProgressTitle">🔄 جاري تحضير الملفات...</div>
+      <div id="driveProgressItems"></div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-track"><div class="progress-bar-fill" id="driveProgressFill" style="width:0%"></div></div>
+        <div class="progress-summary" id="driveProgressSummary">0 / 0</div>
+      </div>
+      <button class="progress-close" id="driveProgressClose" onclick="driveCloseProgress()">إغلاق</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="drive-top">
+      <div class="drive-top-left">
+        <button class="drive-back-btn" id="driveBackBtn" onclick="driveGoBack()" style="display:none"><i class="bi bi-arrow-right"></i></button>
+        <button class="drive-back-btn" onclick="showPage('pageMain')"><i class="bi bi-house"></i></button>
+        <div class="drive-title">☁️ Google Drive</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="refresh-badge" id="driveRefreshBadge">--</span>
+      </div>
+    </div>
+
+    <div id="driveBreadcrumb"></div>
+
+    <div id="driveSearchBar">
+      <input type="text" id="driveSearchInput" placeholder="🔍 ابحث عن ملف...">
+      <button class="clear-btn" onclick="driveClearSearch()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div id="driveStatsBar">
+      <span class="stat-badge" id="driveStatTotal">0 ملف</span>
+      <span class="stat-badge" id="driveStatSize" style="display:none"></span>
+      <span class="stat-badge" id="driveStatPreloaded" style="display:none;background:#ecfdf3;color:#16a34a;border-color:#bbf7d0"></span>
+    </div>
+
+    <div id="driveToolbar">
+      <button class="drive-mini-btn" onclick="driveSelectAll()">تحديد الكل</button>
+      <button class="drive-mini-btn" onclick="driveClearSel()">إلغاء التحديد</button>
+      <span class="drive-sel-count" id="driveSelCount">0 محدد</span>
+    </div>
+
+    <div id="driveLoginCard">
+      <div class="login-icon">📂</div>
+      <div class="login-title">ملفات Google Drive</div>
+      <div class="login-sub">سجل دخول بحساب Google لتصفح ملفاتك وإرسالها</div>
+      <button class="google-btn" onclick="driveSignIn()">
+        <img src="https://www.google.com/favicon.ico" alt="Google">
+        تسجيل الدخول بـ Google
+      </button>
+    </div>
+
+    <div id="driveFilesList" style="display:none"></div>
+  </div>
+
+  <div class="bottom-bar" id="driveBottomDelete">
+    <div class="bottom-wrap">
+      <button class="btn btn-danger" onclick="deleteAllFilesFirebase()">🗑️ حذف الملفات</button>
+    </div>
+  </div>
+  <div class="bottom-bar" id="driveBottomSend" style="display:none">
+    <div class="bottom-wrap">
+      <button class="btn btn-secondary" onclick="driveClearSel()">إلغاء</button>
+      <button class="btn btn-primary" id="driveSendBtn" onclick="driveSendSelected()" disabled>إرسال المحدد</button>
+    </div>
+  </div>
+</div>
+
+<video id="keepAwakeVideo" loop muted playsinline style="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;top:-9999px;"></video>
+
+<!-- ==================== FIREBASE ==================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, get, child, remove, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyDaQ7Ur6f7_ugSTy2_u0-gPEtUsFzhh82U",
+  authDomain:"kashf-system.firebaseapp.com",
+  databaseURL:"https://kashf-system-default-rtdb.firebaseio.com",
+  projectId:"kashf-system",
+  storageBucket:"kashf-system.firebasestorage.app",
+  messagingSenderId:"987561323340",
+  appId:"1:987561323340:web:19d72fce8456f2fdf9bde9"
+});
+const db = getDatabase(app);
+const DELETE_PASSWORD = "1564";
+const SHORTCUT_PDF_NAME = "pdf";
+const CACHE_KEY = "customersByBrand_cache";
+const CACHE_TIME_KEY = "customersByBrand_cache_time";
+const CACHE_MAX_AGE = 30*60*1000;
+
+let selectedBrand="ALL", selectionMode=false, selectedCustomers=new Set();
+let currentFilteredResults=[], lastRestartMessage="";
+let customersByBrand={FOREVER:[],CHARACTER:[],ROSELLA:[],FUTURE:[]};
+
+const previewCustomer=document.getElementById("previewCustomer");
+const previewBrand=document.getElementById("previewBrand");
+const overlay=document.getElementById("searchOverlay");
+const searchInput=document.getElementById("searchInput");
+const results=document.getElementById("searchResults");
+const searchBrandTitle=document.getElementById("searchBrandTitle");
+const statusCard=document.getElementById("statusCard");
+const statusText=document.getElementById("statusText");
+const statusBar=document.getElementById("statusBar");
+const statusLog=document.getElementById("statusLog");
+const statusOverlay=document.getElementById("statusOverlay");
+const startSelectBtn=document.getElementById("startSelectBtn");
+const selectionTools=document.getElementById("selectionTools");
+const selectedCountBox=document.getElementById("selectedCountBox");
+const selectedCount=document.getElementById("selectedCount");
+const bulkSendBar=document.getElementById("bulkSendBar");
+const submitBtn=document.getElementById("submitBtn");
+const bulkSendBtn=document.getElementById("bulkSendBtn");
+previewBrand.textContent="ALL";
+
+// PAGE NAVIGATION
+function showPage(id){
+  document.querySelectorAll(".app-page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==="pageDrive" && !driveAccessToken){
+    const saved=driveLoadToken();
+    if(saved){ driveAccessToken=saved; if(typeof gapi!=="undefined"&&gapi.client) gapi.client.setToken({access_token:saved}); driveFetchTargetFolder(); driveStartRefreshTimer(); }
+  }
+}
+window.showPage=showPage;
+function openDrivePage(){ const dark=localStorage.getItem("darkMode")==="1"?"?dark=1":""; window.location.href="drive-page.html"+dark; }
+window.openDrivePage=openDrivePage;
+
+// DARK MODE
+function initDarkMode(){ const s=localStorage.getItem("darkMode"); if(s==="1"){ document.body.classList.add("dark"); document.getElementById("darkToggleBtn").textContent="☀️"; }else{ document.getElementById("darkToggleBtn").textContent="🌙"; } }
+function toggleDarkMode(){ const d=document.body.classList.toggle("dark"); localStorage.setItem("darkMode",d?"1":"0"); document.getElementById("darkToggleBtn").textContent=d?"☀️":"🌙"; }
+window.toggleDarkMode=toggleDarkMode;
+initDarkMode();
+
+// TOAST
+let toastTimer;
+function showToast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2800); }
+window._toast=showToast;
+
+// CACHE
+function saveToCache(data){ try{ localStorage.setItem(CACHE_KEY,JSON.stringify(data)); localStorage.setItem(CACHE_TIME_KEY,String(Date.now())); }catch{} }
+function loadFromCache(){ try{ const r=localStorage.getItem(CACHE_KEY),t=Number(localStorage.getItem(CACHE_TIME_KEY)||0); if(!r||Date.now()-t>CACHE_MAX_AGE) return null; return JSON.parse(r); }catch{ return null; } }
+function applyCustomersData(data){
+  if(data&&typeof data==="object"){
+    customersByBrand={FOREVER:Array.isArray(data.FOREVER)?data.FOREVER:[],CHARACTER:Array.isArray(data.CHARACTER)?data.CHARACTER:[],ROSELLA:Array.isArray(data.ROSELLA)?data.ROSELLA:[],FUTURE:Array.isArray(data.FUTURE)?data.FUTURE:[]};
+    Object.keys(customersByBrand).forEach(b=>{ customersByBrand[b]=customersByBrand[b].map(item=>typeof item==="string"?{id:Date.now()+Math.random(),name:item}:item); });
+  }else{ customersByBrand={FOREVER:[],CHARACTER:[],ROSELLA:[],FUTURE:[]}; }
+}
+
+async function loadFirebaseCustomers(){
+  const cached=loadFromCache();
+  if(cached){ applyCustomersData(cached); refreshFromFirebaseBackground(); return; }
+  try{
+    const snap=await get(child(ref(db),"customersByBrand"));
+    const data=snap.exists()?snap.val():null;
+    applyCustomersData(data); if(data) saveToCache(data);
+  }catch(error){
+    customersByBrand={FOREVER:[],CHARACTER:[],ROSELLA:[],FUTURE:[]};
+    setTimeout(()=>alert("تنبيه: لم يتم تحميل بيانات الزباين. تحقق من الاتصال."),500);
+  }
+}
+async function refreshFromFirebaseBackground(){ try{ const snap=await get(child(ref(db),"customersByBrand")); if(snap.exists()){ applyCustomersData(snap.val()); saveToCache(snap.val()); } }catch{} }
+
+// SIDEBAR
+function toggleSidebar(){ document.getElementById("sidebar").classList.toggle("open"); document.getElementById("sidebarOverlay").classList.toggle("show"); }
+window.toggleSidebar=toggleSidebar;
+
+// BRAND
+function setBrand(brand,btn){ selectedBrand=brand; document.querySelectorAll(".brand-btn").forEach(b=>b.classList.remove("active")); btn.classList.add("active"); previewBrand.textContent=brand; document.getElementById("customerName").value=""; previewCustomer.textContent="—"; checkSubmitReadyState(); }
+window.setBrand=setBrand;
+function clearForm(){ selectedBrand=""; previewCustomer.textContent="—"; previewBrand.textContent="—"; document.getElementById("customerName").value=""; document.querySelectorAll(".brand-btn").forEach(b=>b.classList.remove("active")); checkSubmitReadyState(); }
+window.clearForm=clearForm;
+
+// SUBMIT BTN
+function setSubmitLoading(l){ if(!submitBtn) return; submitBtn.disabled=l; submitBtn.textContent=l?"جاري الإرسال...":"إرسال الطلب"; submitBtn.style.opacity=l?"0.7":"1"; submitBtn.style.cursor=l?"not-allowed":"pointer"; }
+function setBulkSendLoading(l,count=null){ if(!bulkSendBtn) return; bulkSendBtn.disabled=l; bulkSendBtn.style.opacity=l?"0.7":"1"; bulkSendBtn.style.cursor=l?"not-allowed":"pointer"; if(l){ bulkSendBtn.textContent="جاري الإرسال..."; }else{ const fc=count??selectedCustomers.size; bulkSendBtn.innerHTML='إرسال المحددين (<span id="bulkCount">'+fc+'</span>)'; } }
+function updateSelectedUI(){ const c=selectedCustomers.size; selectedCount.textContent=c; const bc=document.getElementById("bulkCount"); if(bc) bc.textContent=c; selectedCountBox.style.display=selectionMode?"block":"none"; bulkSendBar.style.display=selectionMode&&c>0?"block":"none"; startSelectBtn.style.display=selectionMode?"none":"inline-flex"; selectionTools.style.display=selectionMode?"flex":"none"; }
+function startSelectionMode(){ selectionMode=true; selectedCustomers.clear(); updateSelectedUI(); renderResults(currentFilteredResults); }
+function endSelectionMode(){ selectionMode=false; selectedCustomers.clear(); updateSelectedUI(); renderResults(currentFilteredResults); }
+function clearSelectedCustomers(){ selectedCustomers.clear(); updateSelectedUI(); renderResults(currentFilteredResults); }
+function selectAllVisible(){ currentFilteredResults.forEach(item=>selectedCustomers.add(getCustomerKey(item))); updateSelectedUI(); renderResults(currentFilteredResults); }
+window.startSelectionMode=startSelectionMode; window.endSelectionMode=endSelectionMode; window.clearSelectedCustomers=clearSelectedCustomers; window.selectAllVisible=selectAllVisible;
+
+function getCustomersForSearch(){ if(selectedBrand!=="ALL"){ return [...(customersByBrand[selectedBrand]||[])].map(item=>({id:item.id,name:item.name,brand:selectedBrand,discount:item.discount||"",agent:item.agent||""})); } let all=[]; Object.keys(customersByBrand).forEach(brand=>{ (customersByBrand[brand]||[]).forEach(item=>all.push({id:item.id,name:item.name,brand,discount:item.discount||"",agent:item.agent||""})); }); return all; }
+function getCustomerKey(item){ if(typeof item==="number"||typeof item==="string") return String(item); return String(item.id); }
+function normalizeSearchText(text){ return String(text||"").toLowerCase().trim().replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/ؤ/g,"و").replace(/ئ/g,"ي").replace(/\s+/g," ").replace(/[-_]/g,"").replace(/[^\w\u0600-\u06FF ]/g,""); }
+function containsAllWords(s,q){ const src=normalizeSearchText(s); const words=normalizeSearchText(q).split(" ").filter(Boolean); if(!words.length) return true; return words.every(w=>src.includes(w)); }
+function scoreCustomerMatch(name,query){ const n=normalizeSearchText(name),q=normalizeSearchText(query); if(!q) return 1; const cn=n.replace(/\s/g,""),cq=q.replace(/\s/g,""); let score=0; if(cn===cq) score+=1000; if(n===q) score+=950; if(cn.startsWith(cq)) score+=700; if(n.startsWith(q)) score+=650; if(cn.includes(cq)) score+=500; if(n.includes(q)) score+=450; const words=n.split(" ").filter(Boolean),qWords=q.split(" ").filter(Boolean); qWords.forEach(qw=>words.forEach(w=>{ if(w===qw) score+=120; else if(w.startsWith(qw)) score+=80; else if(w.includes(qw)) score+=40; })); if(qWords.every(qw=>words.some(w=>w.includes(qw)))&&qWords.length>1) score+=300; return score; }
+
+function openSearch(){ if(!selectedBrand){ alert("اختر البراند اولاً"); return; } overlay.classList.add("show"); searchInput.value=""; searchBrandTitle.textContent="البراند المختار: "+selectedBrand; selectionMode=false; selectedCustomers.clear(); updateSelectedUI(); currentFilteredResults=[...getCustomersForSearch()].sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"ar")); renderResults(currentFilteredResults); searchInput.focus(); }
+function closeSearch(){ overlay.classList.remove("show"); selectionMode=false; selectedCustomers.clear(); updateSelectedUI(); }
+window.openSearch=openSearch; window.closeSearch=closeSearch;
+
+searchInput.addEventListener("input",()=>{
+  const text=searchInput.value.trim(); const all=getCustomersForSearch();
+  if(!normalizeSearchText(text)){ currentFilteredResults=[...all].sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"ar")); renderResults(currentFilteredResults); return; }
+  currentFilteredResults=all.map(item=>{ const src=selectedBrand==="ALL"?(item.name+" "+item.brand):item.name; return {item,src,score:scoreCustomerMatch(src,text)}; }).filter(e=>containsAllWords(e.src,text)).sort((a,b)=>b.score-a.score).map(e=>e.item);
+  renderResults(currentFilteredResults);
+});
+
+// BRAND HELPERS
+function detectBrand(name){ const n=(name||"").toUpperCase(); if(n.includes("FUTURE")) return "FUTURE"; if(n.includes("FOREVER")) return "FOREVER"; if(n.includes("CHARACTER")) return "CHARACTER"; if(n.includes("ROSELLA")) return "ROSELLA"; return null; }
+function getBrandColor(brand){ if(brand==="FOREVER") return "#f472b6"; if(brand==="CHARACTER") return "#16a34a"; if(brand==="ROSELLA") return "#0d6efd"; if(brand==="FUTURE") return "#ef4444"; return ""; }
+function getBrandBadgeStyle(brand){ if(brand==="FOREVER") return "background:#f472b6;color:#fff;border:none"; if(brand==="CHARACTER") return "background:#16a34a;color:#fff;border:none"; if(brand==="ROSELLA") return "background:#0d6efd;color:#fff;border:none"; if(brand==="FUTURE") return "background:#ef4444;color:#fff;border:none"; return "background:var(--pl);color:var(--primary);border:1px solid var(--pb)"; }
+
+function renderResults(list){
+  results.innerHTML=""; if(!list.length){ results.innerHTML='<div class="search-item">ماكو نتائج</div>'; return; }
+  if(list.length>100){ const note=document.createElement("div"); note.className="search-item"; note.style.fontWeight="800"; note.style.background="#fff8e1"; note.innerText="تم عرض أول 100 نتيجة من أصل "+list.length; results.appendChild(note); }
+  list.slice(0,100).forEach(item=>{
+    const name=item.name||"", itemBrand=item.brand||selectedBrand, key=getCustomerKey(item), itemDiscount=item.discount||"", itemAgent=item.agent||"";
+    const itemBrandColor=getBrandColor(itemBrand);
+    const div=document.createElement("div"); div.className="search-item"+(selectionMode?" select-mode":"");
+    const showBrand=selectedBrand==="ALL";
+    if(selectionMode){
+      const checkbox=document.createElement("input"); checkbox.type="checkbox"; checkbox.className="search-checkbox"; checkbox.checked=selectedCustomers.has(key); checkbox.addEventListener("click",e=>e.stopPropagation()); checkbox.addEventListener("change",()=>{ selectedCustomers.has(key)?selectedCustomers.delete(key):selectedCustomers.add(key); updateSelectedUI(); });
+      const wrap=document.createElement("div"); wrap.style.cssText="flex:1;display:flex;align-items:center;gap:6px;min-width:0";
+      const ns=document.createElement("span"); ns.style.cssText="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"; ns.innerText=name; wrap.appendChild(ns);
+      if(showBrand){
+        const badgeWrap=document.createElement("div"); badgeWrap.style.cssText="display:flex;flex-direction:column;align-items:center;gap:3px;flex:0 0 auto";
+        const b=document.createElement("span"); b.style.cssText="font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;"+getBrandBadgeStyle(itemBrand)+";white-space:nowrap"; b.innerText=itemBrand; badgeWrap.appendChild(b);
+        if(itemDiscount){ const d=document.createElement("span"); d.style.cssText="font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;background:#f59e0b;color:#fff;white-space:nowrap"; d.innerText=itemDiscount; badgeWrap.appendChild(d); }
+        if(itemAgent){ const a=document.createElement("span"); a.style.cssText="font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;background:#8b5cf6;color:#fff;white-space:nowrap"; a.innerText=itemAgent; badgeWrap.appendChild(a); }
+        wrap.appendChild(badgeWrap);
+      }
+      div.appendChild(checkbox); div.appendChild(wrap);
+      div.onclick=()=>{ selectedCustomers.has(key)?selectedCustomers.delete(key):selectedCustomers.add(key); updateSelectedUI(); renderResults(currentFilteredResults); };
+    }else{
+      div.style.display="flex"; div.style.alignItems="center"; div.style.gap="8px";
+      const ns=document.createElement("span"); ns.style.cssText="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"; ns.innerText=name; div.appendChild(ns);
+      if(showBrand){
+        const badgeWrap=document.createElement("div"); badgeWrap.style.cssText="display:flex;flex-direction:column;align-items:center;gap:3px;flex:0 0 auto";
+        const b=document.createElement("span"); b.style.cssText="font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;"+getBrandBadgeStyle(itemBrand)+";white-space:nowrap"; b.innerText=itemBrand; badgeWrap.appendChild(b);
+        if(itemDiscount){ const d=document.createElement("span"); d.style.cssText="font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;background:#f59e0b;color:#fff;white-space:nowrap"; d.innerText=itemDiscount; badgeWrap.appendChild(d); }
+        if(itemAgent){ const a=document.createElement("span"); a.style.cssText="font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;background:#8b5cf6;color:#fff;white-space:nowrap"; a.innerText=itemAgent; badgeWrap.appendChild(a); }
+        div.appendChild(badgeWrap);
+      }
+      div.onclick=()=>{ saveSearchHistory(name); document.getElementById("customerName").value=name; previewCustomer.textContent=name; if(selectedBrand==="ALL"){ selectedBrand=itemBrand; previewBrand.textContent=itemBrand; document.querySelectorAll(".brand-btn").forEach(b=>b.classList.remove("active")); document.querySelectorAll(".brand-btn").forEach(btn=>{ if(btn.textContent.trim().toUpperCase()===itemBrand) btn.classList.add("active"); }); } checkSubmitReadyState(); closeSearch(); };
+    }
+    // نضيف الـ border بعد كل شي
+    if(itemBrandColor){ div.style.borderRight="4px solid "+itemBrandColor; }
+    results.appendChild(div);
+  });
+}
+
+// STATUS
+function showStatusCard(){ clearTimeout(window.__statusDoneHideTimer); statusOverlay.classList.add("show"); statusCard.style.display="block"; statusCard.classList.remove("success-anim"); const icon=document.getElementById("successIcon"); if(icon) icon.style.display="none"; }
+function hideStatusCard(){ statusOverlay.classList.remove("show"); }
+function prepareStatusCard(mode="processing"){ statusLog.innerHTML=""; statusBar.style.width="0%"; statusText.style.color=""; statusCard.classList.remove("processing","done","error"); if(mode==="processing"){ statusCard.classList.add("processing"); statusText.style.color="#0d6efd"; } else if(mode==="done"){ statusCard.classList.add("done"); statusText.style.color="#15803d"; } else if(mode==="error"){ statusCard.classList.add("error"); statusText.style.color="#dc2626"; } }
+const MAX_LOGS=4;
+function trimStatusLog(){ while(statusLog.children.length>=MAX_LOGS) statusLog.removeChild(statusLog.firstChild); }
+function addStatusLog(message){ if(!message) return; let prefix="• ",color="#444",rowClass="",bg="#ffffff",borderColor="#e6e9ef"; if(message.includes("تم")){ prefix="✅ ";color="#15803d";rowClass="done";bg="#ecfdf3";borderColor="#bbf7d0"; } else if(message.includes("جاري")){ prefix="🔄 ";color="#0d6efd";rowClass="running";bg="#eef4ff";borderColor="#cfe0ff"; } else if(message.includes("فشل")||message.includes("خطأ")){ prefix="❌ ";color="#dc2626";rowClass="error";bg="#fef2f2";borderColor="#fecaca"; } trimStatusLog(); const row=document.createElement("div"); row.className=rowClass; row.innerHTML=`<span style="font-size:16px">${prefix}</span><span>${message}</span>`; row.style.color=color; row.style.background=bg; row.style.borderColor=borderColor; statusLog.appendChild(row); }
+function updateStatus(status,current=null,total=null,customMessage=""){ const counter=current!==null&&total!==null?` (${current} / ${total})`:""; statusCard.classList.remove("processing","done","error"); if(status==="sending"){ statusCard.classList.add("processing"); statusText.style.color="#0d6efd"; statusText.textContent=(customMessage||"جاري إرسال الطلب...")+counter; statusBar.style.width="20%"; addStatusLog((customMessage||"جاري إرسال الطلب")+counter); } else if(status==="new"){ statusCard.classList.add("processing"); statusText.style.color="#0d6efd"; statusText.textContent=(customMessage||"تم إرسال الطلب، بانتظار المعالجة...")+counter; statusBar.style.width="50%"; addStatusLog((customMessage||"تم إرسال الطلب، بانتظار المعالجة")+counter); } else if(status==="processing"){ statusCard.classList.add("processing"); statusText.style.color="#0d6efd"; statusText.textContent=(customMessage||"الطلب قيد المعالجة...")+counter; statusBar.style.width="70%"; addStatusLog((customMessage||"الطلب قيد المعالجة")+counter); } else if(status==="done"){ statusCard.classList.add("done","success-anim"); statusText.style.color="#15803d"; statusText.textContent=(customMessage||"تم إنجاز الطلب بنجاح")+counter; statusBar.style.width="100%"; const icon=document.getElementById("successIcon"); if(icon) icon.style.display="block"; playSuccessSound(); addStatusLog((customMessage||"تم إنجاز الطلب بنجاح")+counter); clearTimeout(window.__statusDoneHideTimer); window.__statusDoneHideTimer=setTimeout(()=>{ hideStatusCard(); statusBar.style.width="0%"; statusLog.innerHTML=""; statusCard.classList.remove("processing","done","error","success-anim"); statusText.textContent="جاري إرسال الطلب..."; statusText.style.color=""; if(icon) icon.style.display="none"; },2500); } else if(status==="error"){ statusCard.classList.add("error"); statusText.style.color="#dc2626"; statusText.textContent=(customMessage||"صار خطأ أثناء معالجة الطلب")+counter; statusBar.style.width="100%"; addStatusLog((customMessage||"خطأ أثناء معالجة الطلب")+counter); } }
+function resetStatusCard(delay=3000){ setTimeout(()=>{ hideStatusCard(); statusBar.style.width="0%"; statusText.textContent="جاري إرسال الطلب..."; statusLog.innerHTML=""; statusCard.classList.remove("processing","done","error"); statusText.style.color=""; },delay); }
+
+// QUEUE
+async function addRequestToQueue(customer,brand,extra={}){ const queueRef=push(ref(db,"requests/queue")); const requestId=queueRef.key; const payload={id:requestId,text:customer+" | "+brand,customer,brand,status:"new",source:"web",time:Date.now(),...extra}; await set(queueRef,payload); return {requestId,time:payload.time}; }
+function waitForQueueRequestCompletion(requestId,current=null,total=null,timeoutMs=180000){ return new Promise((resolve,reject)=>{ let settled=false,unsubscribe=null,timeoutId=null,lastState=""; function finish(fn){ if(settled) return; settled=true; clearTimeout(timeoutId); try{ unsubscribe&&unsubscribe(); }catch{} fn(); } const itemRef=ref(db,"requests/queue/"+requestId); unsubscribe=onValue(itemRef,(snapshot)=>{ if(settled) return; if(!snapshot.exists()) return; const data=snapshot.val()||{}; const st=data.status||"new"; const msg=data.message||""; const key=st+"|"+msg; if(key===lastState&&st!=="done"&&st!=="error") return; lastState=key; if(st==="new") updateStatus("new",current,total,"تمت إضافة الطلب للطابور"); else if(st==="processing") updateStatus("processing",current,total,msg||"الطلب قيد المعالجة"); else if(st==="done") finish(()=>{ updateStatus("done",current,total); resolve("done"); }); else if(st==="error") finish(()=>{ updateStatus("error",current,total,msg||"صار خطأ"); reject(new Error(msg||"error")); }); }); timeoutId=setTimeout(()=>finish(()=>reject(new Error("timeout"))),timeoutMs); }); }
+
+async function saveCustomersToFirebase(data){ await set(ref(db,"customersByBrand"),data); }
+async function deleteCustomersFromFirebase(){ await remove(ref(db,"customersByBrand")); }
+
+async function sendYearToFirebase(){ const year=document.getElementById("yearSelect").value; try{ showStatusCard(); prepareStatusCard("processing"); statusText.textContent="جاري إرسال السنة..."; statusBar.style.width="20%"; addStatusLog("جاري إرسال السنة"); await set(ref(db,"systemCommands/changeYear"),{year,status:"new",time:Date.now()}); waitForYearChange(); }catch(error){ showStatusCard(); prepareStatusCard("error"); statusText.textContent="صار خطأ بإرسال السنة"; statusBar.style.width="100%"; addStatusLog("خطأ في إرسال السنة"); alert("صار خطأ بإرسال السنة"); } }
+window.sendYearToFirebase=sendYearToFirebase;
+
+async function restartBayanFromWeb(){ try{ showStatusCard(); prepareStatusCard("processing"); statusText.textContent="جاري إرسال أمر إعادة التشغيل..."; lastRestartMessage=""; statusBar.style.width="8%"; addStatusLog("جاري إرسال أمر إعادة التشغيل"); await set(ref(db,"systemCommands/restartBayan"),{action:"restart",time:Date.now(),status:"new"}); waitForRestartBayan(); }catch(error){ updateStatus("error",null,null,"صار خطأ بإرسال أمر إعادة التشغيل"); alert("صار خطأ"); } }
+window.restartBayanFromWeb=restartBayanFromWeb;
+
+async function deleteSavedData(){ const password=prompt("ادخل الباسورد لحذف البيانات"); if(password===null) return; if(password!==DELETE_PASSWORD){ alert("الباسورد غير صحيح"); return; } try{ await deleteCustomersFromFirebase(); }catch{} localStorage.removeItem(CACHE_KEY); localStorage.removeItem(CACHE_TIME_KEY); customersByBrand={FOREVER:[],CHARACTER:[],ROSELLA:[],FUTURE:[]}; clearForm(); closeSearch(); results.innerHTML=""; alert("تم حذف البيانات السحابية بنجاح"); }
+window.deleteSavedData=deleteSavedData;
+
+async function deleteAllFiles(){ const ok=confirm("هل تريد حذف كل ملفات PDF؟"); if(!ok) return; try{ await set(ref(db,"systemCommands/deleteFiles"),{action:true,time:Date.now()}); alert("تم إرسال أمر الحذف"); }catch(err){ alert("فشل إرسال أمر الحذف"); } }
+window.deleteAllFiles=deleteAllFiles;
+window.deleteAllFilesFirebase=deleteAllFiles;
+
+// EXCEL IMPORT
+document.getElementById("excelFile").addEventListener("change",function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async function(evt){
+    try{
+      const data=new Uint8Array(evt.target.result); const workbook=XLSX.read(data,{type:"array"}); const sheet=workbook.Sheets[workbook.SheetNames[0]]; const rows=XLSX.utils.sheet_to_json(sheet);
+      if(!rows.length){ alert("فشل الاستيراد: ملف الإكسل فارغ"); return; }
+      const firstRow=rows[0]; const hasName=Object.prototype.hasOwnProperty.call(firstRow,"الاسم"); const hasBrand=Object.prototype.hasOwnProperty.call(firstRow,"البراند")||Object.prototype.hasOwnProperty.call(firstRow,"براند");
+      if(!hasName||!hasBrand){ alert("فشل الاستيراد: الملف يحتاج عمود (الاسم) وعمود (البراند)"); return; }
+      const hasDiscount=Object.prototype.hasOwnProperty.call(firstRow,"خصم المحل");
+      const hasAgent=Object.prototype.hasOwnProperty.call(firstRow,"اسم المندوب");
+      const colNames=Object.keys(firstRow);
+      let warnings=[];
+      if(!hasDiscount){ const similar=colNames.find(c=>c.includes("خصم")||c.includes("حسم")); if(similar) warnings.push("عمود الخصم: وجدنا '"+similar+"' بدل 'خصم المحل'"); }
+      if(!hasAgent){ const similar=colNames.find(c=>c.includes("مندوب")||c.includes("موظف")||c.includes("بائع")); if(similar) warnings.push("عمود المندوب: وجدنا '"+similar+"' بدل 'اسم المندوب'"); }
+      if(warnings.length){ const go=confirm("تحذير - أسماء أعمدة غير صحيحة:\n\n- "+warnings.join("\n- ")+"\n\nتبي تكمل بدون خصم/مندوب؟"); if(!go) return; }
+      let importedCount=0,skippedCount=0,errorMessages=[];
+      const updated={FOREVER:[...customersByBrand.FOREVER],CHARACTER:[...customersByBrand.CHARACTER],ROSELLA:[...customersByBrand.ROSELLA],FUTURE:[...customersByBrand.FUTURE]};
+      let maxId=0; Object.values(updated).forEach(arr=>arr.forEach(item=>{ const n=Number(item.id||0); if(n>maxId) maxId=n; }));
+      rows.forEach((row,index)=>{ const rowNumber=index+2; const name=String(row["الاسم"]||"").trim(); let brand=String(row["البراند"]||row["براند"]||"").trim().toUpperCase(); const discount=row["خصم المحل"]!==undefined?String(row["خصم المحل"]).trim():""; const agent=row["اسم المندوب"]!==undefined?String(row["اسم المندوب"]).trim():""; if(!name){ skippedCount++; errorMessages.push("السطر "+rowNumber+": الاسم فارغ"); return; } if(!brand){ skippedCount++; errorMessages.push("السطر "+rowNumber+": البراند فارغ"); return; } if(/ROZLA|ROSELLA|ROSLLA|روزلا/.test(brand)) brand="ROSELLA"; else if(/FOREVER|فور/.test(brand)) brand="FOREVER"; else if(/CHARACTER|كاركتر/.test(brand)) brand="CHARACTER"; else if(/FUTURE|GENERAL|فيوتشر|جنرال/.test(brand)) brand="FUTURE"; else{ skippedCount++; errorMessages.push("السطر "+rowNumber+": براند غير معروف → "+brand); return; } if(updated[brand].some(item=>String(item.name).trim()===name)){ skippedCount++; errorMessages.push("السطر "+rowNumber+": الاسم مكرر → "+name); return; } maxId++; updated[brand].push({id:maxId,name,discount,agent}); importedCount++; });
+      if(!importedCount){ let details=errorMessages.length?"\n\nالأسباب:\n- "+errorMessages.join("\n- "):""; alert("فشل الاستيراد: ما تم استيراد أي اسم جديد"+details); return; }
+      customersByBrand=updated; await saveCustomersToFirebase(customersByBrand); saveToCache(customersByBrand);
+      let msg="تم الاستيراد السحابي بنجاح. عدد الأسماء الجديدة: "+importedCount; if(skippedCount) msg+="\nالأسطر المهملة: "+skippedCount; if(errorMessages.length) msg+="\n\nتفاصيل:\n- "+errorMessages.join("\n- "); alert(msg);
+    }catch(error){ alert("فشل الاستيراد: "+error.message); }finally{ e.target.value=""; }
+  };
+  reader.onerror=()=>{ alert("فشل الاستيراد: تعذر قراءة الملف"); e.target.value=""; };
+  reader.readAsArrayBuffer(file);
+});
+
+// SUBMIT
+async function submitRequest(){ const customer=document.getElementById("customerName").value.trim(); if(!customer){ alert("اختر الزبون"); return; } if(!selectedBrand){ alert("اختر البراند"); return; } saveSearchHistory(customer); keepScreenAwake(); try{ setSubmitLoading(true); showStatusCard(); prepareStatusCard("processing"); updateStatus("sending",null,null,"جاري إضافة الطلب للطابور"); const q=await addRequestToQueue(customer,selectedBrand,{batchId:"single_"+Date.now(),order:1,total:1}); await waitForQueueRequestCompletion(q.requestId,1,1); resetStatusCard(3000); }catch(error){ resetStatusCard(2500); alert("صار خطأ بالإرسال"); }finally{ allowScreenSleep(); setSubmitLoading(false); } }
+window.submitRequest=submitRequest;
+
+async function sendSelectedCustomers(){
+  if(selectedCustomers.size===0){ alert("ماكو أسماء محددة"); return; }
+  keepScreenAwake(); setBulkSendLoading(true); setSubmitLoading(true);
+  const selectedIds=Array.from(selectedCustomers); const total=selectedIds.length; const batchId="batch_"+Date.now();
+  closeSearch();
+  try{
+    showStatusCard(); prepareStatusCard("processing");
+    updateStatus("sending",0,total,"جاري إضافة الطلبات للطابور...");
+    for(let i=0;i<total;i++){
+      const id=String(selectedIds[i]); let foundItem=null,foundBrand="";
+      Object.keys(customersByBrand).forEach(brand=>{ const item=(customersByBrand[brand]||[]).find(x=>String(x.id)===id); if(item&&!foundItem){ foundItem=item; foundBrand=brand; } });
+      if(!foundItem) continue;
+      saveSearchHistory(foundItem.name);
+      await addRequestToQueue(foundItem.name,foundBrand,{batchId,order:i+1,total});
+    }
+    updateStatus("done",total,total,"تم إضافة "+total+" طلب للطابور ✅");
+    resetStatusCard(3000);
+  }catch(error){
+    updateStatus("error",null,null,"صار خطأ بالإرسال"); resetStatusCard(2500);
+  }finally{
+    allowScreenSleep(); setBulkSendLoading(false,selectedCustomers.size); setSubmitLoading(false);
+  }
+}
+window.sendSelectedCustomers=sendSelectedCustomers;
+
+function waitForYearChange(){ const yearRef=ref(db,"systemCommands/changeYear"); let lastMsg=""; const unsub=onValue(yearRef,(snap)=>{ if(!snap.exists()) return; const data=snap.val(); if(!data) return; statusCard.classList.remove("processing","done","error"); if(data.status==="new"){ statusCard.classList.add("processing"); statusText.style.color="#0d6efd"; statusText.textContent="تم إرسال السنة، بانتظار التنفيذ..."; statusBar.style.width="35%"; const m="تم إرسال السنة، بانتظار التنفيذ"; if(lastMsg!==m){ addStatusLog(m); lastMsg=m; } } else if(data.status==="processing"){ statusCard.classList.add("processing"); statusText.style.color="#0d6efd"; statusText.textContent="جاري تغيير السنة..."; statusBar.style.width="70%"; const m="جاري تغيير السنة"; if(lastMsg!==m){ addStatusLog(m); lastMsg=m; } } else if(data.status==="done"){ updateStatus("done",null,null,"تم تغيير السنة بنجاح"); setTimeout(()=>{ hideStatusCard(); statusBar.style.width="0%"; statusLog.innerHTML=""; statusCard.classList.remove("processing","done","error"); statusText.style.color=""; },3000); unsub(); } else if(data.status==="error"){ updateStatus("error",null,null,data.message||"صار خطأ أثناء تغيير السنة"); unsub(); } }); }
+function waitForRestartBayan(){ const restartRef=ref(db,"systemCommands/restartBayan"); const unsub=onValue(restartRef,(snap)=>{ if(!snap.exists()) return; const data=snap.val(); if(!data) return; if(data.message&&data.message!==lastRestartMessage){ addStatusLog(data.message); lastRestartMessage=data.message; } statusCard.classList.remove("processing","done","error"); if(data.status==="new"){ statusCard.classList.add("processing"); statusText.textContent="تم بدء إعادة التشغيل..."; statusText.style.color="#0d6efd"; statusBar.style.width="12%"; } else if(data.status==="processing"){ statusCard.classList.add("processing"); statusText.textContent="جاري تنفيذ إعادة التشغيل..."; statusText.style.color="#0d6efd"; if(data.message){ if(/فور افر|فورافر|FOREVER/.test(data.message)) statusBar.style.width="33%"; else if(/كاركتر|CHARACTER/.test(data.message)) statusBar.style.width="66%"; else if(/روزلا|ROSELLA/.test(data.message)) statusBar.style.width="90%"; else statusBar.style.width="20%"; }else statusBar.style.width="20%"; } else if(data.status==="done"){ updateStatus("done",null,null,"اكتملت إعادة التشغيل"); setTimeout(()=>{ hideStatusCard(); statusBar.style.width="0%"; statusLog.innerHTML=""; lastRestartMessage=""; statusCard.classList.remove("processing","done","error"); statusText.style.color=""; },3000); unsub(); } else if(data.status==="error"){ updateStatus("error",null,null,data.message||"صار خطأ أثناء إعادة التشغيل"); unsub(); } }); }
+
+// AUDIO
+let successAudioCtx=null;
+function unlockSuccessAudio(){ try{ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; if(!successAudioCtx) successAudioCtx=new AC(); if(successAudioCtx.state==="suspended") successAudioCtx.resume(); }catch{} }
+document.addEventListener("click",unlockSuccessAudio,{passive:true}); document.addEventListener("touchstart",unlockSuccessAudio,{passive:true});
+function playSuccessSound(){ try{ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return; if(!successAudioCtx) successAudioCtx=new AC(); if(successAudioCtx.state==="suspended") successAudioCtx.resume(); const now=successAudioCtx.currentTime,o1=successAudioCtx.createOscillator(),o2=successAudioCtx.createOscillator(),g=successAudioCtx.createGain(); o1.type="sine"; o2.type="sine"; o1.frequency.setValueAtTime(740,now); o2.frequency.setValueAtTime(988,now+0.08); g.gain.setValueAtTime(0.0001,now); g.gain.exponentialRampToValueAtTime(0.08,now+0.02); g.gain.exponentialRampToValueAtTime(0.0001,now+0.28); o1.connect(g); o2.connect(g); g.connect(successAudioCtx.destination); o1.start(now); o2.start(now+0.08); o1.stop(now+0.22); o2.stop(now+0.28); }catch{} }
+
+function keepScreenAwake(){ const v=document.getElementById("keepAwakeVideo"); if(!v) return; const p=v.play(); if(p&&typeof p.catch==="function") p.catch(()=>{}); }
+function allowScreenSleep(){ const v=document.getElementById("keepAwakeVideo"); if(!v) return; try{ v.pause(); v.currentTime=0; }catch{} }
+function checkSubmitReadyState(){ const customer=document.getElementById("customerName").value.trim(); const isReady=!!(customer&&selectedBrand); const btn=document.getElementById("submitBtn"); if(!btn) return; isReady?btn.classList.add("excel-ready"):btn.classList.remove("excel-ready"); }
+function openShortcutPDF(){ window.location.href="shortcuts://run-shortcut?name="+encodeURIComponent(SHORTCUT_PDF_NAME); }
+window.openShortcutPDF=openShortcutPDF;
+
+// PAGE FILES
+function openFilesPickerPage(){ document.getElementById("filesPageInput").click(); }
+function openFolderPickerPage(){ document.getElementById("folderPageInput").click(); }
+window.openFilesPickerPage=openFilesPickerPage; window.openFolderPickerPage=openFolderPickerPage;
+let pickedFilesPage=[],pickedFilesSelected=new Set();
+function normalizePickedFiles(files){ pickedFilesSelected.clear(); pickedFilesPage=Array.from(files||[]).map((file,index)=>({id:String(Date.now())+"_"+index,name:file.webkitRelativePath||file.name,size:file.size||0,nativeFile:file})); renderPickedFilesPage(); }
+function formatFilesPageSize(bytes){ if(bytes<1024) return bytes+" B"; if(bytes<1048576) return (bytes/1024).toFixed(1)+" KB"; if(bytes<1073741824) return (bytes/1048576).toFixed(1)+" MB"; return (bytes/1073741824).toFixed(1)+" GB"; }
+function detectFilesPageType(name){ const l=String(name||"").toLowerCase(); if(l.endsWith(".pdf")) return "PDF"; if(/\.(xlsx|xls|csv)$/.test(l)) return "Excel"; if(/\.(doc|docx)$/.test(l)) return "Word"; if(/\.(jpg|jpeg|png|webp)$/.test(l)) return "صورة"; return "ملف"; }
+function getFilesPageIcon(t){ return t==="PDF"?"bi-file-earmark-pdf-fill":t==="Excel"?"bi-file-earmark-excel-fill":t==="Word"?"bi-file-earmark-word-fill":t==="صورة"?"bi-file-earmark-image-fill":"bi-file-earmark-fill"; }
+function getFilesPageColor(t){ return t==="PDF"?"linear-gradient(135deg,#ef4444,#fb7185)":t==="Excel"?"linear-gradient(135deg,#16a34a,#22c55e)":t==="Word"?"linear-gradient(135deg,#2563eb,#60a5fa)":t==="صورة"?"linear-gradient(135deg,#7c3aed,#a78bfa)":"linear-gradient(135deg,#475569,#94a3b8)"; }
+function updatePickedFilesButton(){ const btn=document.getElementById("sendPickedFilesBtn"); if(!btn) return; const count=pickedFilesSelected.size; btn.disabled=!count; btn.textContent=count?`إرسال المحدد (${count})`:"إرسال المحدد"; }
+function escapeHtml(str){ return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+function renderPickedFilesPage(){ const wrap=document.getElementById("filesPageList"); if(!wrap) return; if(!pickedFilesPage.length){ wrap.className="file-empty"; wrap.innerHTML="ماكو ملفات مختارة حالياً"; updatePickedFilesButton(); return; } wrap.className=""; wrap.innerHTML=pickedFilesPage.map((file,idx)=>{ const checked=pickedFilesSelected.has(file.id)?"checked":""; const type=detectFilesPageType(file.name); return `<div class="file-row-card" data-idx="${idx}"><input class="file-row-check" type="checkbox" ${checked} data-idx="${idx}"><div class="file-row-icon" style="background:${getFilesPageColor(type)};"><i class="bi ${getFilesPageIcon(type)}"></i></div><div class="file-row-info"><div class="file-row-name">${escapeHtml(file.name)}</div><div class="file-row-meta">${formatFilesPageSize(file.size)} • ${type}</div></div></div>`; }).join(""); wrap.querySelectorAll(".file-row-card").forEach(card=>{ const idx=Number(card.dataset.idx); const file=pickedFilesPage[idx]; if(!file) return; card.addEventListener("click",()=>togglePickedFile(file.id)); card.querySelector(".file-row-check").addEventListener("click",e=>{ e.stopPropagation(); togglePickedFile(file.id); }); }); updatePickedFilesButton(); }
+function togglePickedFile(id){ pickedFilesSelected.has(id)?pickedFilesSelected.delete(id):pickedFilesSelected.add(id); renderPickedFilesPage(); }
+function selectAllPickedFiles(){ pickedFilesPage.forEach(f=>pickedFilesSelected.add(f.id)); renderPickedFilesPage(); }
+function clearPickedSelection(){ pickedFilesSelected.clear(); renderPickedFilesPage(); }
+function clearPickedFiles(){ pickedFilesSelected.clear(); pickedFilesPage=[]; const inp=document.getElementById("filesPageInput"); if(inp) inp.value=""; renderPickedFilesPage(); }
+window.togglePickedFile=togglePickedFile; window.selectAllPickedFiles=selectAllPickedFiles; window.clearPickedSelection=clearPickedSelection; window.clearPickedFiles=clearPickedFiles;
+async function sendPickedFiles(){ const selected=pickedFilesPage.filter(f=>pickedFilesSelected.has(f.id)).map(x=>x.nativeFile); if(!selected.length){ alert("حدد ملف واحد على الأقل"); return; } try{ if(navigator.canShare&&navigator.canShare({files:selected})){ await navigator.share({files:selected,title:"مشاركة الملفات",text:"الملفات المحددة"}); }else{ alert("المشاركة المباشرة غير مدعومة هنا"); } }catch(error){ if(error&&error.name!=="AbortError") alert("صار خطأ بالمشاركة"); } }
+window.sendPickedFiles=sendPickedFiles;
+document.getElementById("filesPageInput").addEventListener("change",function(e){ normalizePickedFiles(e.target.files); });
+document.getElementById("folderPageInput").addEventListener("change",function(e){ normalizePickedFiles(e.target.files); });
+
+// VOICE SEARCH
+let voiceRecognition=null,voiceRecording=false;
+function startVoiceSearch(){ const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){ alert("المتصفح ما يدعم البحث الصوتي"); return; } const voiceBtn=document.getElementById("voiceBtn"); if(voiceRecording&&voiceRecognition){ voiceRecognition.stop(); return; } voiceRecognition=new SR(); voiceRecognition.lang="ar-IQ"; voiceRecognition.interimResults=false; voiceRecognition.maxAlternatives=1; voiceRecognition.continuous=false; voiceRecognition.onstart=()=>{ voiceRecording=true; if(voiceBtn){ voiceBtn.classList.add("recording"); voiceBtn.textContent="🎙️"; } searchInput.placeholder="🎤 احچي اسم الزبون..."; }; voiceRecognition.onresult=(event)=>{ const text=event.results[0][0].transcript; searchInput.value=text; searchInput.dispatchEvent(new Event("input")); }; voiceRecognition.onerror=()=>{ voiceRecording=false; if(voiceBtn){ voiceBtn.classList.remove("recording"); voiceBtn.textContent="🎤"; } searchInput.placeholder="ابحث عن اسم الزبون"; }; voiceRecognition.onend=()=>{ voiceRecording=false; if(voiceBtn){ voiceBtn.classList.remove("recording"); voiceBtn.textContent="🎤"; } searchInput.placeholder="ابحث عن اسم الزبون"; }; voiceRecognition.start(); }
+window.startVoiceSearch=startVoiceSearch;
+
+// SEARCH HISTORY
+let searchHistory=JSON.parse(localStorage.getItem("searchHistory")||"[]");
+function saveSearchHistory(text){ text=String(text||"").trim(); if(text.length<2) return; searchHistory=searchHistory.filter(x=>x!==text); searchHistory.unshift(text); if(searchHistory.length>10) searchHistory=searchHistory.slice(0,10); localStorage.setItem("searchHistory",JSON.stringify(searchHistory)); }
+function renderSearchHistory(){ const box=document.getElementById("searchHistoryBox"); if(!box) return; box.innerHTML=""; if(!searchHistory.length){ box.innerHTML='<div class="history-item">ماكو سجل بحث</div>'; return; } searchHistory.forEach(term=>{ const div=document.createElement("div"); div.className="history-item"; div.innerText=term; div.onclick=()=>{ selectedBrand="ALL"; previewBrand.textContent="ALL"; document.querySelectorAll(".brand-btn").forEach(b=>b.classList.remove("active")); document.querySelectorAll(".brand-btn").forEach(btn=>{ if(btn.textContent.trim()==="الكل") btn.classList.add("active"); }); searchBrandTitle.textContent="البراند المختار: ALL"; searchInput.value=term; searchInput.dispatchEvent(new Event("input")); box.style.display="none"; }; box.appendChild(div); }); }
+function toggleSearchHistory(){ const box=document.getElementById("searchHistoryBox"); if(!box) return; if(box.style.display==="none"){ renderSearchHistory(); box.style.display="block"; }else{ box.style.display="none"; } }
+window.toggleSearchHistory=toggleSearchHistory;
+
+await loadFirebaseCustomers();
+</script>
+
+<!-- ==================== GOOGLE DRIVE JS ==================== -->
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
+<script>
+const DRIVE_CLIENT_ID = "503826285883-45mi9qcd6vldrkbanu6me6fpqg5dghqs.apps.googleusercontent.com";
+const DRIVE_API_KEY   = "AIzaSyDwMM73FaT5snh18bs1WEE1A5pnXlGaD1M";
+const DRIVE_SCOPES    = "https://www.googleapis.com/auth/drive.readonly";
+const DRIVE_FOLDER    = "PDF- Cloud Drive";
+const DRIVE_TOKEN_KEY = "gd_token";
+const DRIVE_TOKEN_EXP = "gd_token_exp";
+const DRIVE_REFRESH_SEC = 1;
+const DRIVE_MAX_PARALLEL = 5;
+const DRIVE_MAX_RETRY    = 3;
+
+let driveTokenClient, driveAccessToken=null;
+let driveFolderStack=[], driveCurrentFiles=[], driveFilteredFiles=[], driveSelectedIds=new Set();
+let driveRefreshTimer=null, driveRefreshCountdown=DRIVE_REFRESH_SEC;
+let driveSearchQuery="";
+let drivePreloadCache={}, drivePreloadQueue=[];
+
+function driveSaveToken(t){ localStorage.setItem(DRIVE_TOKEN_KEY,t); localStorage.setItem(DRIVE_TOKEN_EXP,String(Date.now()+55*60*1000)); }
+function driveLoadToken(){ const t=localStorage.getItem(DRIVE_TOKEN_KEY),e=Number(localStorage.getItem(DRIVE_TOKEN_EXP)||0); return(!t||Date.now()>e)?null:t; }
+function driveClearToken(){ localStorage.removeItem(DRIVE_TOKEN_KEY); localStorage.removeItem(DRIVE_TOKEN_EXP); }
+
+function driveStartRefreshTimer(){
+  clearInterval(driveRefreshTimer); driveRefreshCountdown=DRIVE_REFRESH_SEC;
+  driveRefreshTimer=setInterval(()=>{
+    driveRefreshCountdown--;
+    const b=document.getElementById("driveRefreshBadge"); if(b) b.textContent=driveRefreshCountdown<=0?"🔄":driveRefreshCountdown+"ث";
+    if(driveRefreshCountdown<=0){ driveRefreshCountdown=DRIVE_REFRESH_SEC; driveSilentRefresh(); }
+  },1000);
+}
+
+async function driveSilentRefresh(){
+  if(!driveAccessToken||!driveFolderStack.length) return;
+  try{
+    gapi.client.setToken({access_token:driveAccessToken});
+    const res=await gapi.client.drive.files.list({ q:`'${driveFolderStack[driveFolderStack.length-1].id}' in parents and trashed=false`, fields:"files(id,name,mimeType,size,modifiedTime)", orderBy:"modifiedTime desc", pageSize:100 });
+    const nf=res.result.files||[];
+    if(JSON.stringify(nf.map(f=>f.id))!==JSON.stringify(driveCurrentFiles.map(f=>f.id))){ driveCurrentFiles=nf; driveApplySearch(); driveStartPreload(); }
+  }catch(e){ if(e.status===401) driveRefreshToken(); }
+}
+
+function driveInitGapi(){
+  gapi.load("client",async()=>{
+    await gapi.client.init({apiKey:DRIVE_API_KEY,discoveryDocs:["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"]});
+    driveTokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:DRIVE_CLIENT_ID, scope:DRIVE_SCOPES, prompt:"",
+      callback:async(resp)=>{
+        if(resp.error){ showToast("فشل تسجيل الدخول"); return; }
+        driveAccessToken=resp.access_token; driveSaveToken(driveAccessToken);
+        gapi.client.setToken({access_token:driveAccessToken});
+        await driveFetchTargetFolder(); driveStartRefreshTimer();
+      }
+    });
+    const saved=driveLoadToken();
+    if(saved){ driveAccessToken=saved; gapi.client.setToken({access_token:saved}); driveFetchTargetFolder().then(()=>driveStartRefreshTimer()); }
+  });
+}
+
+function driveRefreshToken(){ if(driveTokenClient) driveTokenClient.requestAccessToken(); }
+
+function driveSignIn(){ if(!driveTokenClient){ showToast("جاري التهيئة..."); setTimeout(driveSignIn,1000); return; } driveTokenClient.prompt="select_account"; driveTokenClient.requestAccessToken(); }
+window.driveSignIn=driveSignIn;
+
+async function driveFetchTargetFolder(){
+  driveShowLoading();
+  try{
+    const res=await gapi.client.drive.files.list({ q:`name='${DRIVE_FOLDER}' and mimeType='application/vnd.google-apps.folder' and trashed=false`, fields:"files(id,name)", pageSize:10 });
+    const files=res.result.files||[];
+    driveFolderStack=files.length?[{id:files[0].id,name:files[0].name}]:[{id:"root",name:"My Drive"}];
+    if(!files.length) showToast("ما لكيت المجلد، يعرض My Drive");
+    driveLoadFolder(driveFolderStack[driveFolderStack.length-1].id);
+  }catch(e){ if(e.status===401){ driveRefreshToken(); return; } showToast("خطأ بتحميل المجلد"); }
+}
+
+async function driveLoadFolder(folderId){
+  driveShowLoading(); driveSelectedIds.clear(); driveUpdateSendBtn(); drivePreloadCache={}; drivePreloadQueue=[];
+  try{
+    const res=await gapi.client.drive.files.list({ q:`'${folderId}' in parents and trashed=false`, fields:"files(id,name,mimeType,size,modifiedTime)", orderBy:"modifiedTime desc", pageSize:100 });
+    driveCurrentFiles=res.result.files||[];
+    driveApplySearch(); driveRenderBreadcrumb();
+    document.getElementById("driveLoginCard").style.display="none";
+    document.getElementById("driveFilesList").style.display="block";
+    document.getElementById("driveToolbar").classList.add("show");
+    document.getElementById("driveStatsBar").classList.add("show");
+    document.getElementById("driveSearchBar").classList.add("show");
+    document.getElementById("driveBackBtn").style.display=driveFolderStack.length>1?"flex":"none";
+    // تحديث العنوان باسم المجلد الحالي
+    document.querySelector(".drive-title").textContent="📁 "+driveFolderStack[driveFolderStack.length-1].name;
+    driveStartPreload();
+  }catch(e){ if(e.status===401){ driveRefreshToken(); return; } showToast("خطأ بتحميل الملفات"); }
+}
+
+function driveApplySearch(){
+  if(driveSearchQuery.trim()){ const q=driveSearchQuery.trim().toLowerCase(); driveFilteredFiles=driveCurrentFiles.filter(f=>(f.name||"").toLowerCase().includes(q)); }
+  else driveFilteredFiles=[...driveCurrentFiles];
+  driveRenderFiles(); driveUpdateStats();
+}
+
+document.getElementById("driveSearchInput").addEventListener("input",e=>{ driveSearchQuery=e.target.value; driveApplySearch(); });
+function driveClearSearch(){ document.getElementById("driveSearchInput").value=""; driveSearchQuery=""; driveApplySearch(); }
+window.driveClearSearch=driveClearSearch;
+
+function driveUpdateStats(){
+  const total=driveFilteredFiles.length; document.getElementById("driveStatTotal").textContent=total+" ملف";
+  const sz=driveFilteredFiles.reduce((s,f)=>s+(Number(f.size)||0),0); const szEl=document.getElementById("driveStatSize"); if(sz>0){ szEl.textContent=driveFmtSize(sz); szEl.style.display=""; }else szEl.style.display="none";
+  const pc=driveFilteredFiles.filter(f=>drivePreloadCache[f.id]).length; const pEl=document.getElementById("driveStatPreloaded"); if(pc>0){ pEl.textContent="⚡ "+pc+" جاهز"; pEl.style.display=""; }else pEl.style.display="none";
+}
+
+async function driveStartPreload(){ drivePreloadQueue=driveCurrentFiles.filter(f=>f.mimeType!=="application/vnd.google-apps.folder"&&!drivePreloadCache[f.id]); for(let i=0;i<2;i++) drivePreloadWorker(); }
+async function drivePreloadWorker(){ while(drivePreloadQueue.length){ const f=drivePreloadQueue.shift(); if(!f||drivePreloadCache[f.id]) continue; try{ const res=await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`,{headers:{Authorization:"Bearer "+driveAccessToken}}); if(!res.ok) continue; const blob=await res.blob(); drivePreloadCache[f.id]=new File([blob],f.name,{type:blob.type||"application/pdf"}); driveUpdateStats(); driveRenderFiles(); }catch{} } }
+
+
+
+function driveRenderFiles(){
+  const wrap=document.getElementById("driveFilesList");
+  if(!driveFilteredFiles.length){ wrap.innerHTML='<div class="drive-empty">ماكو ملفات هنا</div>'; return; }
+  wrap.innerHTML=driveFilteredFiles.map((f,i)=>{
+    const isFolder=f.mimeType==="application/vnd.google-apps.folder";
+    const isPdf=f.name?.toLowerCase().endsWith(".pdf");
+    const checked=driveSelectedIds.has(f.id);
+    const isPreloaded=!!drivePreloadCache[f.id];
+    const size=f.size?driveFmtSize(Number(f.size)):"";
+    const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleDateString("ar"):"";
+    const brand=!isFolder?detectBrand(f.name):null;
+    const brandBadge=brand?`<span class="drive-brand-badge" style="${getBrandBadgeStyle(brand)}">${brand}</span>`:"";
+    return `<div class="file-card${checked?" selected":""}${isPreloaded?" preloaded":""}" data-idx="${i}">
+      <input type="checkbox" class="file-check" ${checked?"checked":""}>
+      <div class="file-icon-wrap">
+        <div class="drive-file-icon${isFolder?" folder":""}"><i class="bi ${isFolder?"bi-folder-fill":isPdf?"bi-file-earmark-pdf-fill":"bi-file-earmark-fill"}"></i></div>
+        <div class="preload-badge">⚡</div>
+      </div>
+      <div class="drive-file-info">
+        <div class="drive-file-name-row">
+          <div class="drive-file-name">${driveEsc(f.name)}</div>
+          ${brandBadge}
+        </div>
+        <div class="drive-file-meta">${size}${size&&date?" • ":""}${date}</div>
+      </div>
+      ${isFolder?`<i class="bi bi-chevron-left file-arrow"></i>`:`<button class="open-btn" data-idx="${i}"><i class="bi bi-eye"></i></button>`}
+    </div>`;
+  }).join("");
+
+  wrap.querySelectorAll(".file-card").forEach((card,i)=>{
+    const f=driveFilteredFiles[i];
+    if(f.mimeType==="application/vnd.google-apps.folder"){
+      card.onclick=()=>driveOpenFolder(f);
+      card.querySelector(".file-check").onclick=e=>{ e.stopPropagation(); driveToggleFile(i); };
+    }else{
+      card.onclick=()=>driveToggleFile(i);
+      card.querySelector(".file-check").onclick=e=>{ e.stopPropagation(); driveToggleFile(i); };
+      const ob=card.querySelector(".open-btn"); if(ob) ob.onclick=e=>{ e.stopPropagation(); driveOpenFilePreview(f); };
+    }
+  });
+}
+
+function driveRenderBreadcrumb(){ document.getElementById("driveBreadcrumb").innerHTML=driveFolderStack.map((f,i)=>{ const isLast=i===driveFolderStack.length-1; return `<span class="crumb" onclick="driveJumpTo(${i})">${driveEsc(f.name)}</span>${!isLast?'<span class="crumb-sep"><i class="bi bi-chevron-left"></i></span>':""}` }).join(""); }
+
+function driveOpenFolder(f){ driveFolderStack.push({id:f.id,name:f.name}); driveLoadFolder(f.id); }
+function driveGoBack(){ if(driveFolderStack.length<=1) return; driveFolderStack.pop(); driveLoadFolder(driveFolderStack[driveFolderStack.length-1].id); }
+function driveJumpTo(idx){ driveFolderStack=driveFolderStack.slice(0,idx+1); driveLoadFolder(driveFolderStack[driveFolderStack.length-1].id); }
+window.driveGoBack=driveGoBack; window.driveJumpTo=driveJumpTo; window.driveOpenFolder=driveOpenFolder;
+
+async function driveOpenFilePreview(f){
+  showToast("جاري فتح الملف...");
+  try{
+    let fileBlob=drivePreloadCache[f.id];
+    if(!fileBlob){ const res=await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`,{headers:{Authorization:"Bearer "+driveAccessToken}}); if(!res.ok) throw new Error("فشل"); fileBlob=await res.blob(); }
+    const url=URL.createObjectURL(fileBlob); window.open(url,"_blank"); setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }catch(e){ showToast("فشل فتح الملف ❌"); }
+}
+
+function driveToggleFile(idx){ const f=driveFilteredFiles[idx]; if(f.mimeType==="application/vnd.google-apps.folder") return; driveSelectedIds.has(f.id)?driveSelectedIds.delete(f.id):driveSelectedIds.add(f.id); driveUpdateSendBtn(); driveRenderFiles(); }
+function driveSelectAll(){ driveFilteredFiles.forEach(f=>{ if(f.mimeType!=="application/vnd.google-apps.folder") driveSelectedIds.add(f.id); }); driveUpdateSendBtn(); driveRenderFiles(); }
+function driveClearSel(){ driveSelectedIds.clear(); driveUpdateSendBtn(); driveRenderFiles(); }
+function driveUpdateSendBtn(){
+  const count=driveSelectedIds.size;
+  const sel=driveFilteredFiles.filter(f=>driveSelectedIds.has(f.id));
+  const sz=sel.reduce((s,f)=>s+(Number(f.size)||0),0);
+  const btn=document.getElementById("driveSendBtn"); btn.disabled=!count;
+  btn.textContent=count?`إرسال ${count} ملف${sz>0?" ("+driveFmtSize(sz)+")":""}` :"إرسال المحدد";
+  document.getElementById("driveSelCount").textContent=count+" محدد";
+  document.getElementById("driveBottomSend").style.display=count?"block":"none";
+  document.getElementById("driveBottomDelete").style.display=count?"none":"block";
+}
+window.driveSelectAll=driveSelectAll; window.driveClearSel=driveClearSel;
+
+function driveSendSelected(){ const toSend=driveFilteredFiles.filter(f=>driveSelectedIds.has(f.id)); if(!toSend.length) return; const sz=toSend.reduce((s,f)=>s+(Number(f.size)||0),0); document.getElementById("driveConfirmSub").textContent=`${toSend.length} ملف • ${driveFmtSize(sz)}`; document.getElementById("driveConfirmList").innerHTML=toSend.map(f=>`<div class="confirm-file-item">${driveEsc(f.name)}</div>`).join(""); document.getElementById("driveConfirmOverlay").classList.add("show"); }
+function driveCloseConfirm(){ document.getElementById("driveConfirmOverlay").classList.remove("show"); }
+window.driveCloseConfirm=driveCloseConfirm; window.driveSendSelected=driveSendSelected;
+
+async function driveDoSend(){
+  driveCloseConfirm();
+  const toSend=driveFilteredFiles.filter(f=>driveSelectedIds.has(f.id)); if(!toSend.length) return;
+  driveOpenProgress(toSend);
+  const downloaded=await driveDownloadParallel(toSend);
+  document.getElementById("driveProgressClose").style.display="block";
+  document.getElementById("driveProgressTitle").textContent=downloaded.length===toSend.length?"✅ اكتمل التحضير":`⚠️ تم ${downloaded.length} من ${toSend.length}`;
+  if(!downloaded.length){ showToast("فشل تحميل الملفات"); return; }
+  await new Promise(r=>setTimeout(r,500)); driveCloseProgress();
+  try{ if(navigator.canShare&&navigator.canShare({files:downloaded})){ await navigator.share({files:downloaded,title:"ملفات PDF"}); driveClearSel(); } else{ downloaded.forEach(file=>{ const url=URL.createObjectURL(file); const a=document.createElement("a"); a.href=url; a.download=file.name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),3000); }); } }catch(e){ if(e?.name!=="AbortError") showToast("صار خطأ بالمشاركة"); }
+}
+window.driveDoSend=driveDoSend;
+
+let driveProgressState={};
+function driveOpenProgress(files){ driveProgressState={}; files.forEach(f=>{ driveProgressState[f.id]={name:f.name,status:"waiting"}; }); driveRenderProgress(files.length); document.getElementById("driveProgressTitle").textContent="🔄 جاري تحضير الملفات..."; document.getElementById("driveProgressOverlay").classList.add("show"); document.getElementById("driveProgressClose").style.display="none"; }
+function driveRenderProgress(total){ const done=Object.values(driveProgressState).filter(s=>s.status==="done").length; const err=Object.values(driveProgressState).filter(s=>s.status==="error").length; document.getElementById("driveProgressFill").style.width=(total?Math.round((done+err)/total*100):0)+"%"; document.getElementById("driveProgressSummary").textContent=`${done} / ${total}${err?" (فشل "+err+")":""}`; document.getElementById("driveProgressItems").innerHTML=Object.values(driveProgressState).slice(0,8).map(s=>{ let icon="⏳",cls="loading"; if(s.status==="done"){icon="✅";cls="done";}else if(s.status==="error"){icon="❌";cls="error";}else if(s.status==="retry"){icon="🔁";cls="retry";} return `<div class="progress-item"><div class="p-icon ${cls}">${icon}</div><div class="p-name">${driveEsc(s.name)}</div><div class="p-status">${s.status==="done"?"تم":s.status==="error"?"فشل":s.status==="retry"?"إعادة...":"جاري"}</div></div>`; }).join(""); }
+function driveUpdateProgress(id,status,total){ if(driveProgressState[id]) driveProgressState[id].status=status; driveRenderProgress(total); }
+function driveCloseProgress(){ document.getElementById("driveProgressOverlay").classList.remove("show"); }
+window.driveCloseProgress=driveCloseProgress;
+
+async function driveDownloadFile(f,total){
+  if(drivePreloadCache[f.id]){ driveUpdateProgress(f.id,"done",total); return drivePreloadCache[f.id]; }
+  driveUpdateProgress(f.id,"loading",total);
+  for(let attempt=1;attempt<=DRIVE_MAX_RETRY;attempt++){
+    try{
+      if(attempt>1){ driveUpdateProgress(f.id,"retry",total); await new Promise(r=>setTimeout(r,600*attempt)); }
+      const res=await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`,{headers:{Authorization:"Bearer "+driveAccessToken}});
+      if(res.status===401){ driveRefreshToken(); await new Promise(r=>setTimeout(r,1000)); continue; }
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const blob=await res.blob(); driveUpdateProgress(f.id,"done",total); return new File([blob],f.name,{type:blob.type||"application/pdf"});
+    }catch(e){ if(attempt===DRIVE_MAX_RETRY){ driveUpdateProgress(f.id,"error",total); return null; } }
+  }
+  return null;
+}
+
+async function driveDownloadParallel(files){ const results=new Array(files.length).fill(null); const queue=files.map((f,i)=>({f,i})); const workers=Array.from({length:DRIVE_MAX_PARALLEL},async()=>{ while(queue.length){ const {f,i}=queue.shift(); results[i]=await driveDownloadFile(f,files.length); } }); await Promise.all(workers); return results.filter(Boolean); }
+
+function driveShowLoading(){ const w=document.getElementById("driveFilesList"); w.style.display="block"; w.innerHTML=[1,2,3,4,5].map(()=>'<div class="skeleton"></div>').join(""); document.getElementById("driveLoginCard").style.display="none"; }
+function driveFmtSize(b){ if(b<1024) return b+" B"; if(b<1048576) return (b/1024).toFixed(1)+" KB"; if(b<1073741824) return (b/1048576).toFixed(1)+" MB"; return (b/1073741824).toFixed(1)+" GB"; }
+function driveEsc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+window.onload = driveInitGapi;
+</script>
+</body>
+</html>

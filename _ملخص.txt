@@ -1,0 +1,45 @@
+=== مشروع Google Drive PDF Viewer ===
+
+آخر تحديث: 10 يونيو 2026
+
+== الملفات ==
+- pdf-viewer-original.html : النسخة الأصلية بدون تعديل (باك أب)
+- pdf-viewer-v1.html : أول تعديل (تنظيف + ميزات)
+- pdf-viewer-v2.html : v1 + إصلاح المتغيرات + openPreview الأصلي
+- pdf-viewer-v3.html : v2 + showLogin + silentAuth retry (باك أب)
+- pdf-viewer-v4.html : v3 + إضافة رقم الفيرجن في الواجهة والكود (أحدث نسخة شغالة)
+- kashf-account-original.html : النسخة الأصلية لكشف حساب (باك أب)
+- kashf-account-v1.html : أول نسخة + إضافة رقم الفيرجن (أحدث نسخة شغالة)
+
+== التعليمات المهمة ==
+1. أي تعديل جديد: ارفع رقم الفيرجن من الـ const APP_VERSION والـ span.version في الـ bottom-bar، واحفظ نسخة كملف جديد pdf-viewer-v{N}.html
+
+2. الملف الشغال حاليًا: pdf-viewer-v4.html
+
+3. كل محادثة جديدة: اقرأ ملف _ملخص.txt عشان تعرف آخر版本 والتعديلات
+
+4. الخلفية البيضاء الفاضية أسفل الصفحة: تم حلها بإزالة padding-bottom:90px + إضافة div spacer + min-height:100dvh
+
+5. إزالة الملفات عن طريق Google Drive API مباشرة (وليس Firebase):
+   - الوصول للـ scope: drive (وليس drive.readonly)
+   - الدوال: deleteDriveFile, deleteAllFiles, deleteSelected
+
+6. الـ silent token refresh: يحاول 3 مرات كل 1.5 ثانية، إذا فشل يظهر login card
+
+7. التوكن دائم (ما ينتهي): saveToken() ما يحط expiry, loadToken() يرجع التوكن كما هو
+
+8. إذا غيرت الـ scope: المستخدم يحتاج يمسح بيانات Safari (Website Data) مرة وحدة، ويسوي sign in عشان يوافق على الصلاحية الجديدة
+
+9. deleteSingleFile اشتغلناها (.delete) بدون Firebase
+
+10. تم إضافة AGENTS.md + opencode.json عشان opencode يقرا التعليمات تلقائياً
+
+== كيفية التشغيل ==
+- افتح Terminal
+- cd C:\Users\medo2\Desktop\GOOGLE APP
+- opencode
+- اسألني عن أي شيء
+
+== كيفية إضافة تعليمات جديدة ==
+- قلي "حدث AGENTS.md" أو "احفظ التعليمات" وأنا أضيفها
+- أو عدل ملف AGENTS.md بنفسك

@@ -1,0 +1,6 @@
+المرة الجاية:
+
+افتح Terminal
+cd C:\Users\medo2\Desktop\GOOGLE APP
+opencode
+اسألني عن أي شيء - أنا بكون قريت AGENTS.md وعارف كل شيء عن المشروع
