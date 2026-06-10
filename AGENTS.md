@@ -10,6 +10,11 @@
 - **آخر نسخة:** `kashf-account-v3.html` (شغالة)
 - **الأصل:** `kashf-account-original.html`
 
+### 3. Big Pickle Chat
+- **الملف:** `big-pickle-chat.html`
+- **الوصف:** تطبيق شات جوال (PWA) متصل بـ Big Pickle عبر Zen API
+- **الملفات المرتبطة:** `manifest.json`, `sw.js`
+
 ## Versioning Rule (لجميع المشاريع)
 - أي تعديل جديد: ارفع رقم الفيرجن من `const APP_VERSION` و `<span class="version">` في الـ bottom-bar
 - احفظ نسخة كملف جديد `{project}-v{N}.html`
