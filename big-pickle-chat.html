@@ -314,6 +314,13 @@ function autoResize(el) {
 }
 input.focus();
 
+// Check for file:// protocol
+if (location.protocol === "file:") {
+  document.addEventListener("DOMContentLoaded", () => {
+    addSystem("⚠️ الملف مفتوح محلياً. استخدم السيرفر: `python -m http.server 8080` في مجلد GOOGLE APP، أو افتح http://localhost:8080/big-pickle-chat.html");
+  });
+}
+
 // Toast
 function showToast(msg) {
   toast.textContent = msg;
