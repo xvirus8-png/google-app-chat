@@ -3,110 +3,219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Big Pickle Chat</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥒</text></svg>">
+<title>ملفات PDF</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Big Pickle">
-<meta name="theme-color" content="#0f1117">
-<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ملفات PDF">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
-body{--bg:#0f1117;--surface:#1a1d27;--text:#e2e8f0;--sub:#8896b0;--border:#2e3348;--user-bubble:#0d6efd;--bot-bubble:#1e2236;--input-bg:#1a1d27;--shadow:0 4px 20px rgba(0,0,0,.3);font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100%}
-body.light{--bg:#f5f7fa;--surface:#fff;--text:#1f2a44;--sub:#6e7b96;--border:#edf2ff;--user-bubble:#0d6efd;--bot-bubble:#f0f4ff;--input-bg:#fff;--shadow:0 4px 20px rgba(0,0,0,.06)}
-#header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.1);z-index:10;flex-shrink:0}
-#header .logo{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-#header .info{flex:1;min-width:0}
-#header h1{font-size:17px;font-weight:800}
-#header .sub{font-size:11px;color:var(--sub);opacity:.7}
-#header .hdr-btns{display:flex;gap:6px}
-.hdr-btn{width:38px;height:38px;border:none;border-radius:10px;background:transparent;color:var(--sub);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
-.hdr-btn:active{background:var(--border)}
-#chat{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
-#chat::-webkit-scrollbar{width:4px}
-#chat::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
-.msg{max-width:88%;padding:10px 14px;border-radius:16px;font-size:15px;line-height:1.6;animation:fadeIn .25s ease;word-wrap:break-word;white-space:pre-wrap}
-.msg.user{background:var(--user-bubble);color:#fff;align-self:flex-end;border-bottom-left-radius:4px}
-.msg.bot{background:var(--bot-bubble);color:var(--text);align-self:flex-start;border-bottom-right-radius:4px;border:1px solid var(--border)}
-.msg.system{background:transparent;color:var(--sub);font-size:12px;align-self:center;text-align:center;padding:6px 12px}
-.msg code{background:rgba(0,0,0,.2);padding:2px 6px;border-radius:6px;font-size:13px;font-family:'Cascadia Code','Fira Code','Consolas',monospace}
-.msg pre{background:#0a0c12;border:1px solid var(--border);border-radius:12px;padding:12px;overflow-x:auto;margin:8px 0;direction:ltr;text-align:left}
-.msg pre code{background:none;padding:0;font-size:13px}
-.typing{display:flex;gap:4px;padding:8px 0}
-.typing span{width:8px;height:8px;border-radius:50%;background:var(--sub);animation:bounce 1.2s infinite}
-.typing span:nth-child(2){animation-delay:.2s}
-.typing span:nth-child(3){animation-delay:.4s}
-#input-area{background:var(--surface);border-top:1px solid var(--border);padding:10px 12px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0}
-#input-wrap{flex:1;background:var(--input-bg);border:1.5px solid var(--border);border-radius:14px;padding:4px 12px;display:flex;align-items:center;gap:6px;transition:border-color .2s}
-#input-wrap:focus-within{border-color:#22c55e}
-#msgInput{border:none;background:none;outline:none;color:var(--text);font-size:15px;font-family:inherit;flex:1;padding:8px 0;max-height:120px;resize:none;line-height:1.5;direction:rtl;text-align:right}
-#msgInput::placeholder{color:var(--sub);opacity:.5}
-#sendBtn{width:44px;height:44px;border:none;border-radius:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s,transform .1s}
-#sendBtn:disabled{opacity:.4;cursor:not-allowed}
-#sendBtn:active:not(:disabled){transform:scale(.92)}
-#apiModal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
-#apiModal.show{display:flex}
-.modal-card{background:var(--surface);border-radius:20px;padding:24px;width:min(100%,380px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
-.modal-card h2{font-size:18px;font-weight:800;margin-bottom:4px}
-.modal-card p{font-size:13px;color:var(--sub);margin-bottom:16px;line-height:1.7}
-.modal-card label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}
-.modal-card input{width:100%;padding:12px;border-radius:12px;border:1.5px solid var(--border);font-size:15px;background:var(--input-bg);color:var(--text);outline:none;direction:ltr;text-align:left}
-.modal-card input:focus{border-color:#22c55e}
-.modal-card .btn{width:100%;padding:14px;border:none;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;margin-top:16px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
-#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1f2a44;color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:99;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+:root{
+  --bg:#f5f7fa;--card:#fff;--shadow:0 8px 25px rgba(0,0,0,.07);
+  --text:#1f2a44;--sub:#6e7b96;--border:#edf2ff;
+  --primary:#0d6efd;--pl:#eef4ff;--pb:#dbe4ff;
+  --bottom:#f5f7fa;--input-bg:#fff;
+}
+body.dark{
+  --bg:#0f1117;--card:#1a1d27;--shadow:0 8px 25px rgba(0,0,0,.3);
+  --text:#e2e8f0;--sub:#8896b0;--border:#2a3456;
+  --pl:#161926;--pb:#2a3456;
+  --bottom:#0f1117;--input-bg:#1a1d27;
+}
+html{min-height:100dvh;background:var(--bg)!important}body{min-height:100dvh;background:var(--bg)!important;color:var(--text);font-family:system-ui;}
+.container{max-width:600px;margin:auto;padding:15px;min-height:100dvh;background:var(--bg)}
+
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.top-bar h1{font-size:20px;font-weight:800;color:var(--text)}
+.top-bar-left{display:flex;align-items:center;gap:8px}
+.icon-btn{width:42px;height:42px;border:none;border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-size:18px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;transition:background .3s}
+
+#searchBar{display:none;margin-bottom:10px;gap:8px}
+#searchBar.show{display:flex}
+#searchBarInput{flex:1;padding:11px 14px;border-radius:12px;border:1.5px solid var(--pb);font-size:15px;background:var(--input-bg);color:var(--text);outline:none;transition:background .3s,color .3s}
+.clear-btn{width:42px;height:42px;border:none;border-radius:12px;background:var(--pl);color:var(--primary);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--pb);flex:0 0 42px}
+
+#statsBar{display:none;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+#statsBar.show{display:flex}
+.stat-badge{font-size:12px;font-weight:700;padding:5px 10px;border-radius:8px;background:var(--pl);color:var(--primary);border:1px solid var(--pb)}
+
+#loginCard{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100dvh - 90px);gap:16px;text-align:center}
+.login-icon{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#4285f4,#34a853);display:flex;align-items:center;justify-content:center;font-size:38px;margin-bottom:8px}
+.login-title{font-size:20px;font-weight:800;color:var(--text)}
+.login-sub{font-size:14px;color:var(--sub);max-width:260px;line-height:1.6}
+.google-btn{display:flex;align-items:center;gap:10px;padding:14px 24px;border-radius:16px;border:none;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);font-size:16px;font-weight:700;cursor:pointer;color:#1f2a44}
+.google-btn img{width:22px;height:22px}
+
+#toolbar{display:none;margin-bottom:10px;gap:8px;flex-wrap:wrap;align-items:center}
+#toolbar.show{display:flex}
+.mini-btn{border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:800;cursor:pointer;background:var(--pl);color:var(--primary);border:1px solid var(--pb)}
+.sel-count{font-size:13px;font-weight:800;color:var(--sub);padding:9px 4px}
+.refresh-badge{font-size:11px;font-weight:700;color:var(--sub);padding:4px 8px;border-radius:8px;background:var(--pl);border:1px solid var(--pb)}
+
+#breadcrumb{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;min-height:28px}
+.crumb{font-size:13px;font-weight:700;color:var(--primary);cursor:pointer;padding:4px 8px;border-radius:8px;background:var(--pl);border:1px solid var(--pb)}
+.crumb-sep{color:var(--sub);font-size:12px}
+
+.file-card{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;border:1.5px solid var(--border);cursor:pointer;transition:background .3s,border-color .3s}
+.file-card.selected{border-color:var(--primary);background:var(--pl)}
+.file-check{width:20px;height:20px;accent-color:var(--primary);flex:0 0 20px}
+.file-icon-wrap{position:relative;flex:0 0 42px}
+.file-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#ef4444,#fb7185);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+.file-icon.folder{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
+.preload-badge{position:absolute;bottom:-3px;right:-3px;width:15px;height:15px;border-radius:50%;background:#16a34a;border:2px solid var(--card);align-items:center;justify-content:center;font-size:8px;color:#fff;display:none}
+.file-card.preloaded .preload-badge{display:flex}
+.file-info{flex:1;min-width:0}
+.file-name-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.file-name{font-size:14px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.brand-badge{font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;white-space:nowrap;flex:0 0 auto}
+.file-meta{font-size:12px;color:var(--sub)}
+.file-arrow{color:var(--sub);font-size:16px}
+.open-btn{width:36px;height:36px;border:none;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--pb);flex:0 0 36px;background:var(--pl);color:var(--primary)}
+
+.empty-box{background:var(--card);border-radius:16px;padding:32px;text-align:center;color:var(--sub);font-weight:700;box-shadow:var(--shadow)}
+.skeleton{background:var(--card);border-radius:16px;height:66px;margin-bottom:10px;overflow:hidden;position:relative}
+.skeleton::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 25%,rgba(150,150,150,.08) 50%,transparent 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bottom);padding:12px;border-top:1px solid var(--border);z-index:100;}
+.bottom-wrap{max-width:600px;margin:auto;display:flex;gap:10px}
+.btn{flex:1;padding:14px;border:none;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 8px 20px rgba(13,110,253,.25)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:var(--pl);color:var(--primary);border:1.5px solid var(--pb)}
+.btn-danger{background:linear-gradient(135deg,#ef4444,#fb7185);color:#fff;box-shadow:0 8px 20px rgba(239,68,68,.25)}
+
+#confirmOverlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:6000;display:none;align-items:center;justify-content:center}
+#confirmOverlay.show{display:flex}
+.confirm-card{background:var(--card);border-radius:20px;padding:24px;width:min(90%,360px);box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+.confirm-title{font-size:18px;font-weight:800;margin-bottom:8px;color:var(--text)}
+.confirm-sub{font-size:13px;color:var(--sub);margin-bottom:16px;line-height:1.6}
+.confirm-files{background:var(--bg);border-radius:12px;padding:10px;margin-bottom:16px;max-height:150px;overflow-y:auto;text-align:right}
+.confirm-file-item{font-size:13px;font-weight:700;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border)}
+.confirm-file-item:last-child{border-bottom:none}
+.confirm-btns{display:flex;gap:10px}
+.confirm-btn{flex:1;padding:13px;border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer}
+.confirm-btn.ok{background:var(--primary);color:#fff}
+.confirm-btn.cancel{background:var(--pl);color:var(--primary);border:1px solid var(--pb)}
+
+#progressOverlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);z-index:5000;display:none;align-items:center;justify-content:center}
+#progressOverlay.show{display:flex}
+.progress-card{background:var(--card);border-radius:20px;padding:24px;width:min(90%,380px);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.progress-title{font-size:17px;font-weight:800;margin-bottom:16px;color:var(--text)}
+.progress-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text)}
+.progress-item:last-child{border-bottom:none}
+.p-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 28px}
+.p-icon.done{background:#ecfdf3;color:#16a34a}
+.p-icon.loading{background:#eef4ff;color:#0d6efd;animation:spin .8s linear infinite}
+.p-icon.error{background:#fef2f2;color:#dc2626}
+.p-icon.retry{background:#fff8e1;color:#d97706}
+.p-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-status{font-size:11px;color:var(--sub)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.progress-bar-wrap{margin-top:16px}
+.progress-bar-track{height:8px;background:var(--border);border-radius:999px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#0d6efd,#6ea8fe);border-radius:999px;transition:width .4s ease}
+.progress-summary{font-size:13px;font-weight:700;color:var(--sub);margin-top:8px;text-align:center}
+.progress-close{width:100%;padding:12px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin-top:16px;display:none}
+
+#toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%) translateY(20px);background:#1f2a44;color:#fff;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@media(max-width:400px){.msg{max-width:92%;font-size:14px}}
-.code-header{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:#0a0c12;border:1px solid var(--border);border-bottom:none;border-radius:12px 12px 0 0;direction:rtl}
-.code-header span{font-size:11px;color:var(--sub);font-weight:700}
-.copy-btn{background:var(--surface);border:none;color:var(--sub);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:700}
 </style>
 </head>
 <body>
 
-<div id="header">
-  <div class="logo">🥒</div>
-  <div class="info">
-    <h1>Big Pickle</h1>
-    <div class="sub">open code zen</div>
-  </div>
-  <div class="hdr-btns">
-    <button class="hdr-btn" onclick="toggleTheme()" title="الوضع">🌙</button>
-    <button class="hdr-btn" onclick="clearChat()" title="مسح المحادثة">🗑️</button>
-    <button class="hdr-btn" onclick="showApiModal()" title="API Key">🔑</button>
-  </div>
-</div>
-
-<div id="chat">
-  <div class="msg system">مرحباً بك في Big Pickle 🥒 اسألني عن أي شيء</div>
-</div>
-
-<div id="input-area">
-  <div id="input-wrap">
-    <button id="sendBtn" onclick="sendMsg()">⬆</button>
-    <textarea id="msgInput" rows="1" placeholder="اكتب رسالتك..." oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
-  </div>
-</div>
-
-<div id="apiModal">
-  <div class="modal-card">
-    <h2>🔑 مفتاح API</h2>
-    <p>ادخل مفتاح API من <strong>opencode.ai/auth</strong><br>المفتاح يحفظ في جهازك فقط ولا يرسل لأي جهة.</p>
-    <label>API Key</label>
-    <input type="password" id="apiKeyInput" placeholder="sk-..." dir="ltr" style="direction:ltr;text-align:left" autocomplete="off">
-    <button class="btn" onclick="saveApiKey()">حفظ</button>
-  </div>
-</div>
-
 <div id="toast"></div>
+
+<div id="confirmOverlay">
+  <div class="confirm-card">
+    <div class="confirm-title">📤 تأكيد الإرسال</div>
+    <div class="confirm-sub" id="confirmSub"></div>
+    <div class="confirm-files" id="confirmFilesList"></div>
+    <div class="confirm-btns">
+      <button class="confirm-btn cancel" onclick="closeConfirm()">إلغاء</button>
+      <button class="confirm-btn ok" onclick="doSend()">إرسال</button>
+    </div>
+  </div>
+</div>
+
+<div id="progressOverlay">
+  <div class="progress-card">
+    <div class="progress-title" id="progressTitle">🔄 جاري تحضير الملفات...</div>
+    <div id="progressItems"></div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-summary" id="progressSummary">0 / 0</div>
+    </div>
+    <button class="progress-close" id="progressClose" onclick="closeProgress()">إغلاق</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <button class="icon-btn" id="backBtn" onclick="goBack()" style="display:none"><i class="bi bi-arrow-right"></i></button>
+      <h1 id="pageTitle">📁 ملفات PDF</h1>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="refresh-badge" id="refreshBadge">--</span>
+      <button class="icon-btn" id="darkBtn" onclick="toggleDark()">🌙</button>
+    </div>
+  </div>
+
+  <div id="breadcrumb"></div>
+
+  <div id="searchBar">
+    <input type="text" id="searchBarInput" placeholder="🔍 ابحث عن ملف...">
+    <button class="clear-btn" onclick="clearSearch()"><i class="bi bi-x-lg"></i></button>
+  </div>
+
+  <div id="statsBar">
+    <span class="stat-badge" id="statTotal">0 ملف</span>
+    <span class="stat-badge" id="statSize" style="display:none"></span>
+    <span class="stat-badge" id="statPreloaded" style="display:none;background:#ecfdf3;color:#16a34a;border-color:#bbf7d0"></span>
+  </div>
+
+  <div id="toolbar">
+    <button class="mini-btn" onclick="selectAll()">تحديد الكل</button>
+    <button class="mini-btn" onclick="clearSel()">إلغاء التحديد</button>
+    <button class="mini-btn" onclick="deleteSelected()" style="background:#fef2f2;color:#dc2626;border-color:#fecaca">🗑️ حذف المحدد</button>
+    <span class="sel-count" id="selCount">0 محدد</span>
+  </div>
+
+  <div id="loginCard">
+    <div class="login-icon">📂</div>
+    <div class="login-title">ملفات Google Drive</div>
+    <div class="login-sub">سجل دخول بحساب Google لتصفح ملفاتك وإرسالها</div>
+    <button class="google-btn" onclick="signIn()">
+      <img src="https://www.google.com/favicon.ico" alt="Google">
+      تسجيل الدخول بـ Google
+    </button>
+  </div>
+
+  <div id="filesList"></div>
+
+  <div style="height:90px"></div>
+</div>
+
+<div class="bottom-bar" id="bottomBarDelete" style="display:none">
+  <div class="bottom-wrap">
+    <span class="version" style="font-size:12px;font-weight:700;color:var(--sub);padding:9px 4px">v5</span>
+    <button class="btn btn-danger" onclick="deleteAllFiles()">🗑️ حذف الكل</button>
+  </div>
+</div>
+<div class="bottom-bar" id="bottomBar" style="display:none">
+  <div class="bottom-wrap">
+    <span class="version" style="font-size:12px;font-weight:700;color:var(--sub);padding:9px 4px">v5</span>
+    <button class="btn btn-secondary" onclick="clearSel()">إلغاء</button>
+    <button class="btn btn-primary" id="sendBtn" onclick="sendSelected()" disabled>إرسال المحدد</button>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, set, onValue, remove, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-const app = initializeApp({
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const fbApp = initializeApp({
   apiKey:"AIzaSyDaQ7Ur6f7_ugSTy2_u0-gPEtUsFzhh82U",
   authDomain:"kashf-system.firebaseapp.com",
   databaseURL:"https://kashf-system-default-rtdb.firebaseio.com",
@@ -115,250 +224,321 @@ const app = initializeApp({
   messagingSenderId:"987561323340",
   appId:"1:987561323340:web:19d72fce8456f2fdf9bde9"
 });
-const db = getDatabase(app);
+const db = getDatabase(fbApp);
+</script>
 
-const MODEL = "big-pickle";
-const STORAGE_KEY = "bp_chat_history";
-const KEY_STORAGE = "bp_api_key";
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
+<script>
+const CLIENT_ID     = "503826285883-45mi9qcd6vldrkbanu6me6fpqg5dghqs.apps.googleusercontent.com";
+const API_KEY       = "AIzaSyDwMM73FaT5snh18bs1WEE1A5pnXlGaD1M";
+const SCOPES        = "https://www.googleapis.com/auth/drive";
+const TARGET_FOLDER = "PDF- Cloud Drive";
+const TOKEN_KEY     = "gd_token";
+const TOKEN_EXP_KEY = "gd_token_exp";
+const REFRESH_SEC   = 1;
+const MAX_PARALLEL  = 5;
+const MAX_RETRY     = 3;
+const APP_VERSION   = "v5";
 
-let apiKey = localStorage.getItem(KEY_STORAGE) || "";
-let messages = [];
-let isSending = false;
-let currentRequestKey = null;
-let currentListener = null;
-let requestTimeout = null;
+let tokenClient, accessToken=null, _authing=0;
+let folderStack=[], currentFiles=[], filteredFiles=[], selectedIds=new Set();
+let refreshTimer=null, refreshCountdown=REFRESH_SEC;
+let searchQuery="", preloadCache={}, preloadQueue=[];
 
-const chat = document.getElementById("chat");
-const input = document.getElementById("msgInput");
-const sendBtn = document.getElementById("sendBtn");
-const toast = document.getElementById("toast");
+// DARK MODE
+function initDark(){
+  const fromUrl=new URLSearchParams(window.location.search).get("dark")==="1";
+  const fromStorage=localStorage.getItem("dm")==="1";
+  if(fromUrl||fromStorage){ document.body.classList.add("dark"); document.getElementById("darkBtn").textContent="☀️"; if(fromUrl) localStorage.setItem("dm","1"); }
+}
+function toggleDark(){ const d=document.body.classList.toggle("dark"); localStorage.setItem("dm",d?"1":"0"); document.getElementById("darkBtn").textContent=d?"☀️":"🌙"; }
+window.toggleDark=toggleDark;
+initDark();
 
-loadHistory();
-if (!apiKey) {
-  setTimeout(showApiModal, 500);
+// TOAST
+let toastTimer;
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2800); }
+window._toast=toast;
+
+// TOKEN
+function saveToken(t){ localStorage.setItem(TOKEN_KEY,t); }
+function loadToken(){ return localStorage.getItem(TOKEN_KEY)||null; }
+function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
+
+// BRAND
+function detectBrand(name){ const n=(name||"").toUpperCase(); if(n.includes("FUTURE")) return "FUTURE"; if(n.includes("FOREVER")) return "FOREVER"; if(n.includes("CHARACTER")) return "CHARACTER"; if(n.includes("ROSELLA")) return "ROSELLA"; return null; }
+function brandStyle(brand){ if(brand==="FOREVER") return "background:#f472b6;color:#fff;border:none"; if(brand==="CHARACTER") return "background:#16a34a;color:#fff;border:none"; if(brand==="ROSELLA") return "background:#0d6efd;color:#fff;border:none"; if(brand==="FUTURE") return "background:#ef4444;color:#fff;border:none"; return ""; }
+
+// REFRESH
+function startRefreshTimer(){
+  clearInterval(refreshTimer); refreshCountdown=REFRESH_SEC;
+  refreshTimer=setInterval(()=>{
+    refreshCountdown--;
+    document.getElementById("refreshBadge").textContent=refreshCountdown<=0?"🔄":refreshCountdown+"ث";
+    if(refreshCountdown<=0){ refreshCountdown=REFRESH_SEC; silentRefresh(); }
+  },1000);
 }
 
-function showApiModal() {
-  document.getElementById("apiModal").classList.add("show");
-  document.getElementById("apiKeyInput").value = apiKey;
-  setTimeout(() => document.getElementById("apiKeyInput").focus(), 300);
-}
-function hideApiModal() {
-  document.getElementById("apiModal").classList.remove("show");
-}
-function saveApiKey() {
-  const val = document.getElementById("apiKeyInput").value.trim();
-  if (!val) { showToast("ادخل مفتاح API"); return; }
-  apiKey = val;
-  localStorage.setItem(KEY_STORAGE, val);
-  hideApiModal();
-  showToast("✅ تم حفظ المفتاح");
+async function silentRefresh(){
+  if(!accessToken||!folderStack.length) return;
+  try{
+    gapi.client.setToken({access_token:accessToken});
+    const res=await gapi.client.drive.files.list({ q:`'${folderStack[folderStack.length-1].id}' in parents and trashed=false`, fields:"files(id,name,mimeType,size,modifiedTime)", orderBy:"modifiedTime desc", pageSize:100 });
+    const nf=res.result.files||[];
+    if(JSON.stringify(nf.map(f=>f.id))!==JSON.stringify(currentFiles.map(f=>f.id))){ currentFiles=nf; applySearch(); startPreload(); }
+  }catch(e){ if(e.status===401) refreshToken(); }
 }
 
-function toggleTheme() {
-  const isLight = document.body.classList.toggle("light");
-  document.querySelector(".hdr-btn[onclick*='toggleTheme']").textContent = isLight ? "🌙" : "☀️";
-  localStorage.setItem("bp_theme", isLight ? "light" : "dark");
+// INIT
+function initGapi(){
+  gapi.load("client",async()=>{
+    await gapi.client.init({apiKey:API_KEY,discoveryDocs:["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"]});
+    tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:CLIENT_ID, scope:SCOPES, prompt:"",
+      callback:async(resp)=>{
+        if(resp.error){
+          if(_authing===2) toast("فشل تسجيل الدخول");
+          else showLogin();
+          _authing=0; return;
+        }
+        _authing=0; accessToken=resp.access_token; saveToken(accessToken);
+        gapi.client.setToken({access_token:accessToken});
+        await findTargetFolder(); startRefreshTimer();
+      }
+    });
+    const saved=loadToken();
+    if(saved){ accessToken=saved; gapi.client.setToken({access_token:saved}); findTargetFolder().catch(()=>showLogin()).then(()=>startRefreshTimer()); }
+    else showLogin();
+  });
 }
-function initTheme() {
-  if (localStorage.getItem("bp_theme") === "light") {
-    document.body.classList.add("light");
-    document.querySelector(".hdr-btn[onclick*='toggleTheme']").textContent = "☀️";
-  }
-}
-initTheme();
+function refreshToken(){ if(tokenClient&&!_authing){ _authing=1; tokenClient.prompt=""; tokenClient.requestAccessToken(); } }
+function signIn(){ if(!tokenClient){ toast("جاري التهيئة..."); setTimeout(signIn,1000); return; } _authing=2; clearToken(); tokenClient.prompt="consent"; tokenClient.requestAccessToken(); }
+async function silentAuth(){ for(let i=0;i<3;i++){ if(accessToken&&await checkToken()) return true; refreshToken(); await sleep(1500); } return false; }
+async function checkToken(){ try{ await gapi.client.drive.about.get({fields:"user"}); return true; }catch{ return false; } }
+window.signIn=signIn;
 
-function addMsg(role, content) {
-  const div = document.createElement("div");
-  div.className = "msg " + role;
-  div.innerHTML = formatContent(content);
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-  return div;
-}
-
-function addSystem(text) {
-  const div = document.createElement("div");
-  div.className = "msg system";
-  div.textContent = text;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function formatContent(text) {
-  return text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
-    const trimmed = code.replace(/\n$/, "");
-    const langLabel = lang || "code";
-    return `<div class="code-header"><span>${langLabel}</span><button class="copy-btn" onclick="copyCode(this)">نسخ</button></div><pre><code>${escHtml(trimmed)}</code></pre>`;
-  }).replace(/`([^`]+)`/g, "<code>$1</code>");
-}
-
-function escHtml(s) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+async function findTargetFolder(){
+  showLoading();
+  try{
+    const res=await gapi.client.drive.files.list({ q:`name='${TARGET_FOLDER}' and mimeType='application/vnd.google-apps.folder' and trashed=false`, fields:"files(id,name)", pageSize:10 });
+    const files=res.result.files||[];
+    folderStack=files.length?[{id:files[0].id,name:files[0].name}]:[{id:"root",name:"My Drive"}];
+    if(!files.length) toast("ما لكيت المجلد، يعرض My Drive");
+    loadFolder(folderStack[0].id);
+  }catch(e){ if(e.status===401){ if(await silentAuth()) findTargetFolder(); else showLogin(); return; } showLogin(); console.error(e); }
 }
 
-function copyCode(btn) {
-  const pre = btn.closest(".code-header").nextElementSibling;
-  const code = pre.textContent;
-  navigator.clipboard.writeText(code).then(() => {
-    btn.textContent = "✅";
-    setTimeout(() => btn.textContent = "نسخ", 1500);
+async function loadFolder(folderId){
+  showLoading(); selectedIds.clear(); updateSendBtn(); preloadCache={}; preloadQueue=[];
+  try{
+    const res=await gapi.client.drive.files.list({ q:`'${folderId}' in parents and trashed=false`, fields:"files(id,name,mimeType,size,modifiedTime)", orderBy:"modifiedTime desc", pageSize:100 });
+    currentFiles=res.result.files||[];
+    applySearch(); renderBreadcrumb();
+    document.getElementById("loginCard").style.display="none";
+    document.getElementById("filesList").style.display="block";
+    document.getElementById("toolbar").classList.add("show");
+    document.getElementById("statsBar").classList.add("show");
+    document.getElementById("searchBar").classList.add("show");
+    document.getElementById("backBtn").style.display=folderStack.length>1?"flex":"none";
+    document.getElementById("pageTitle").textContent="📁 "+folderStack[folderStack.length-1].name;
+    startPreload();
+  }catch(e){ if(e.status===401){ if(await silentAuth()) loadFolder(folderId); else showLogin(); return; } showLogin(); console.error(e); }
+}
+
+// SEARCH
+function applySearch(){
+  filteredFiles=searchQuery.trim()?currentFiles.filter(f=>(f.name||"").toLowerCase().includes(searchQuery.trim().toLowerCase())):[...currentFiles];
+  renderFiles(); updateStats();
+}
+document.getElementById("searchBarInput").addEventListener("input",e=>{ searchQuery=e.target.value; applySearch(); });
+function clearSearch(){ document.getElementById("searchBarInput").value=""; searchQuery=""; applySearch(); }
+window.clearSearch=clearSearch;
+
+function updateStats(){
+  document.getElementById("statTotal").textContent=filteredFiles.length+" ملف";
+  const sz=filteredFiles.reduce((s,f)=>s+(Number(f.size)||0),0);
+  const szEl=document.getElementById("statSize"); if(sz>0){ szEl.textContent=fmt(sz); szEl.style.display=""; }else szEl.style.display="none";
+  const pc=filteredFiles.filter(f=>preloadCache[f.id]).length;
+  const pEl=document.getElementById("statPreloaded"); if(pc>0){ pEl.textContent="⚡ "+pc+" جاهز"; pEl.style.display=""; }else pEl.style.display="none";
+}
+
+// PRELOAD
+async function startPreload(){ preloadQueue=currentFiles.filter(f=>f.mimeType!=="application/vnd.google-apps.folder"&&!preloadCache[f.id]); for(let i=0;i<2;i++) preloadWorker(); }
+async function preloadWorker(){ while(preloadQueue.length){ const f=preloadQueue.shift(); if(!f||preloadCache[f.id]) continue; try{ const res=await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`,{headers:{Authorization:"Bearer "+accessToken}}); if(!res.ok) continue; const blob=await res.blob(); const file=new File([blob],f.name,{type:blob.type||"application/pdf"}); file.amount=await extractAmount(blob); preloadCache[f.id]=file; updateStats(); renderFiles(); }catch{} } }
+
+// AMOUNT EXTRACTION
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+async function extractAmount(blob){ try{ const data=await blob.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data}).promise; const page=await pdf.getPage(pdf.numPages); const text=await page.getTextContent(); const lines={}; text.items.forEach(item=>{ const y=Math.round(item.transform[5]); if(!lines[y]) lines[y]=[]; lines[y].push(item.str); }); const sortedY=Object.keys(lines).map(Number).sort((a,b)=>b-a); for(const y of sortedY){ const lineText=lines[y].join(' ').replace(/[',\s]/g,''); const nums=lineText.match(/\d+/); if(nums) return parseInt(nums[0],10); } }catch(e){console.error("extractAmount:",e)} return null; }
+function fmtAmount(n){ if(n==null) return ''; return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+
+// RENDER
+function renderFiles(){
+  const wrap=document.getElementById("filesList");
+  if(!filteredFiles.length){ wrap.innerHTML='<div class="empty-box">ماكو ملفات هنا</div>'; return; }
+  wrap.innerHTML=filteredFiles.map((f,i)=>{
+    const isFolder=f.mimeType==="application/vnd.google-apps.folder";
+    const isPdf=f.name?.toLowerCase().endsWith(".pdf");
+    const checked=selectedIds.has(f.id);
+    const isPreloaded=!!preloadCache[f.id];
+    const amount=isPreloaded?preloadCache[f.id]?.amount:null;
+    const size=f.size?fmt(Number(f.size)):"";
+    const date=f.modifiedTime?new Date(f.modifiedTime).toLocaleDateString("ar"):"";
+    const brand=!isFolder?detectBrand(f.name):null;
+    const badge=brand?`<span class="brand-badge" style="${brandStyle(brand)}">${brand}</span>`:"";
+    const brandColor=brand==="FOREVER"?"#f472b6":brand==="CHARACTER"?"#16a34a":brand==="ROSELLA"?"#0d6efd":brand==="FUTURE"?"#ef4444":"";
+    const cardStyle=brandColor?`border-color:${brandColor}20;border-right:3px solid ${brandColor}`:"";
+    const amountHtml=amount!=null?`<div class="file-meta" style="color:#16a34a;font-weight:800;font-size:13px">💰 ${fmtAmount(amount)} د.ع</div>`:'';
+    return `<div class="file-card${checked?" selected":""}${isPreloaded?" preloaded":""}" data-idx="${i}" style="${cardStyle}">
+      <input type="checkbox" class="file-check" ${checked?"checked":""}>
+      <div class="file-icon-wrap">
+        <div class="file-icon${isFolder?" folder":""}"><i class="bi ${isFolder?"bi-folder-fill":isPdf?"bi-file-earmark-pdf-fill":"bi-file-earmark-fill"}"></i></div>
+        <div class="preload-badge">⚡</div>
+      </div>
+      <div class="file-info">
+        <div class="file-name-row"><div class="file-name">${esc(f.name)}</div></div>
+        <div class="file-meta" style="font-weight:800;font-size:13px;color:${brand==="FOREVER"?"#f472b6":brand==="CHARACTER"?"#16a34a":brand==="ROSELLA"?"#0d6efd":brand==="FUTURE"?"#ef4444":"var(--sub)"}">${brand||""}</div>
+        ${amountHtml}
+      </div>
+      ${isFolder?`<i class="bi bi-chevron-left file-arrow"></i>`:`<button class="open-btn" data-idx="${i}"><i class="bi bi-eye"></i></button>`}
+    </div>`;
+  }).join("");
+
+  wrap.querySelectorAll(".file-card").forEach((card,i)=>{
+    const f=filteredFiles[i];
+    if(f.mimeType==="application/vnd.google-apps.folder"){
+      card.onclick=()=>openFolder(f);
+      card.querySelector(".file-check").onclick=e=>{ e.stopPropagation(); toggleFile(i); };
+    }else{
+      card.onclick=()=>toggleFile(i);
+      card.querySelector(".file-check").onclick=e=>{ e.stopPropagation(); toggleFile(i); };
+      const ob=card.querySelector(".open-btn"); if(ob) ob.onclick=e=>{ e.stopPropagation(); openPreview(f); };
+    }
   });
 }
 
-function showTyping() {
-  const div = document.createElement("div");
-  div.className = "msg bot";
-  div.id = "typingIndicator";
-  div.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+function renderBreadcrumb(){
+  document.getElementById("breadcrumb").innerHTML=folderStack.map((f,i)=>{
+    const isLast=i===folderStack.length-1;
+    return `<span class="crumb" onclick="jumpTo(${i})">${esc(f.name)}</span>${!isLast?'<span class="crumb-sep"><i class="bi bi-chevron-left"></i></span>':""}`;
+  }).join("");
 }
 
-function removeTyping() {
-  const el = document.getElementById("typingIndicator");
-  if (el) el.remove();
+function openFolder(f){ folderStack.push({id:f.id,name:f.name}); loadFolder(f.id); }
+function goBack(){ if(folderStack.length<=1) return; folderStack.pop(); loadFolder(folderStack[folderStack.length-1].id); }
+function jumpTo(idx){ folderStack=folderStack.slice(0,idx+1); loadFolder(folderStack[folderStack.length-1].id); }
+window.goBack=goBack; window.jumpTo=jumpTo; window.openFolder=openFolder;
+
+async function openPreview(f){
+  toast("جاري فتح الملف...");
+  try{
+    const blob=preloadCache[f.id]||(await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`,{headers:{Authorization:"Bearer "+accessToken}}).then(r=>{ if(!r.ok) throw new Error(); return r.blob(); }));
+    const url=URL.createObjectURL(blob); window.open(url,"_blank"); setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }catch{ toast("فشل فتح الملف ❌"); }
 }
 
-async function sendMsg() {
-  const text = input.value.trim();
-  if (!text || isSending) return;
-  if (!apiKey) { showToast("🔑 ادخل مفتاح API أولاً"); showApiModal(); return; }
+// SELECTION
+function toggleFile(idx){ const f=filteredFiles[idx]; if(f.mimeType==="application/vnd.google-apps.folder") return; selectedIds.has(f.id)?selectedIds.delete(f.id):selectedIds.add(f.id); updateSendBtn(); renderFiles(); }
+function selectAll(){ filteredFiles.forEach(f=>{ if(f.mimeType!=="application/vnd.google-apps.folder") selectedIds.add(f.id); }); updateSendBtn(); renderFiles(); }
+function clearSel(){ selectedIds.clear(); updateSendBtn(); renderFiles(); }
+function updateSendBtn(){
+  const count=selectedIds.size;
+  const sel=filteredFiles.filter(f=>selectedIds.has(f.id));
+  const sz=sel.reduce((s,f)=>s+(Number(f.size)||0),0);
+  const btn=document.getElementById("sendBtn"); btn.disabled=!count;
+  btn.textContent=count?`إرسال ${count} ملف${sz>0?" ("+fmt(sz)+")":""}` :"إرسال المحدد";
+  document.getElementById("selCount").textContent=count+" محدد";
+  document.getElementById("bottomBar").style.display=count?"block":"none";
+  document.getElementById("bottomBarDelete").style.display=count?"none":"block";
+}
+window.selectAll=selectAll; window.clearSel=clearSel;
 
-  input.value = "";
-  autoResize(input);
-  addMsg("user", text);
-  addSystem("جاري الرد...");
+// CONFIRM
+function sendSelected(){ const toSend=filteredFiles.filter(f=>selectedIds.has(f.id)); if(!toSend.length) return; const sz=toSend.reduce((s,f)=>s+(Number(f.size)||0),0); document.getElementById("confirmSub").textContent=`${toSend.length} ملف • ${fmt(sz)}`; document.getElementById("confirmFilesList").innerHTML=toSend.map(f=>`<div class="confirm-file-item">${esc(f.name)}</div>`).join(""); document.getElementById("confirmOverlay").classList.add("show"); }
+function closeConfirm(){ document.getElementById("confirmOverlay").classList.remove("show"); }
+window.closeConfirm=closeConfirm; window.sendSelected=sendSelected;
 
-  messages.push({ role: "user", content: text });
-  saveHistory();
-  isSending = true;
-  sendBtn.disabled = true;
+async function doSend(){
+  closeConfirm();
+  const toSend=filteredFiles.filter(f=>selectedIds.has(f.id)); if(!toSend.length) return;
+  openProgress(toSend);
+  const downloaded=await downloadParallel(toSend);
+  document.getElementById("progressClose").style.display="block";
+  document.getElementById("progressTitle").textContent=downloaded.length===toSend.length?"✅ اكتمل التحضير":`⚠️ تم ${downloaded.length} من ${toSend.length}`;
+  if(!downloaded.length){ toast("فشل تحميل الملفات"); return; }
+  await sleep(500); closeProgress();
+  try{ if(navigator.canShare&&navigator.canShare({files:downloaded})){ await navigator.share({files:downloaded,title:"ملفات PDF"}); clearSel(); }else{ downloaded.forEach(file=>{ const url=URL.createObjectURL(file); const a=document.createElement("a"); a.href=url; a.download=file.name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),3000); }); } }
+  catch(e){ if(e?.name!=="AbortError") toast("صار خطأ بالمشاركة"); }
+}
+window.doSend=doSend;
 
-  try {
-    const payload = {
-      messages: [
-        { role: "system", content: "أنت مساعد ذكي اسمك Big Pickle. ردودك بالعربية دقيقة ومفيدة. تساعد في البرمجة والإجابة على الأسئلة." },
-        ...messages.slice(-20)
-      ],
-      apiKey: apiKey,
-      status: "pending",
-      timestamp: Date.now()
-    };
+// PROGRESS
+let progressState={};
+function openProgress(files){ progressState={}; files.forEach(f=>{ progressState[f.id]={name:f.name,status:"waiting"}; }); renderProgress(files.length); document.getElementById("progressTitle").textContent="🔄 جاري تحضير الملفات..."; document.getElementById("progressOverlay").classList.add("show"); document.getElementById("progressClose").style.display="none"; }
+function renderProgress(total){ const done=Object.values(progressState).filter(s=>s.status==="done").length; const err=Object.values(progressState).filter(s=>s.status==="error").length; document.getElementById("progressFill").style.width=(total?Math.round((done+err)/total*100):0)+"%"; document.getElementById("progressSummary").textContent=`${done} / ${total}${err?" (فشل "+err+")":""}`; document.getElementById("progressItems").innerHTML=Object.values(progressState).slice(0,8).map(s=>{ let icon="⏳",cls="loading"; if(s.status==="done"){icon="✅";cls="done";}else if(s.status==="error"){icon="❌";cls="error";}else if(s.status==="retry"){icon="🔁";cls="retry";} return `<div class="progress-item"><div class="p-icon ${cls}">${icon}</div><div class="p-name">${esc(s.name)}</div><div class="p-status">${s.status==="done"?"تم":s.status==="error"?"فشل":s.status==="retry"?"إعادة...":"جاري"}</div></div>`; }).join(""); }
+function updateProgress(id,status,total){ if(progressState[id]) progressState[id].status=status; renderProgress(total); }
+function closeProgress(){ document.getElementById("progressOverlay").classList.remove("show"); }
+window.closeProgress=closeProgress;
 
-    const newRef = push(ref(db, "bp_chat"), payload);
-    currentRequestKey = newRef.key;
-
-    requestTimeout = setTimeout(() => {
-      if (currentListener) {
-        currentListener();
-        currentListener = null;
-      }
-      const sysMsgs = chat.querySelectorAll(".msg.system");
-      if (sysMsgs.length > 0) sysMsgs[sysMsgs.length - 1].remove();
-      addMsg("bot", "⚠️ لم يتم الرد - تأكد من تشغيل bp-chat-relay.py");
-      isSending = false;
-      sendBtn.disabled = false;
-      currentRequestKey = null;
-    }, 120000);
-
-    currentListener = onValue(ref(db, "bp_chat/" + currentRequestKey), (snapshot) => {
-      const data = snapshot.val();
-      if (!data || data.status !== "done") return;
-
-      if (requestTimeout) { clearTimeout(requestTimeout); requestTimeout = null; }
-
-      const sysMsgs = chat.querySelectorAll(".msg.system");
-      if (sysMsgs.length > 0) sysMsgs[sysMsgs.length - 1].remove();
-
-      if (data.error) {
-        addMsg("bot", "⚠️ " + data.error);
-      } else if (data.response) {
-        addMsg("bot", data.response);
-        messages.push({ role: "assistant", content: data.response });
-        saveHistory();
-      }
-
-      remove(ref(db, "bp_chat/" + currentRequestKey));
-      currentRequestKey = null;
-      currentListener = null;
-      isSending = false;
-      sendBtn.disabled = false;
-      input.focus();
-    });
-
-  } catch (e) {
-    const sysMsgs = chat.querySelectorAll(".msg.system");
-    if (sysMsgs.length > 0) sysMsgs[sysMsgs.length - 1].remove();
-    addMsg("bot", "⚠️ خطأ: " + e.message);
-    isSending = false;
-    sendBtn.disabled = false;
-    input.focus();
+// DOWNLOAD
+async function downloadFile(f,total){
+  if(preloadCache[f.id]){ updateProgress(f.id,"done",total); return preloadCache[f.id]; }
+  updateProgress(f.id,"loading",total);
+  for(let attempt=1;attempt<=MAX_RETRY;attempt++){
+    try{
+      if(attempt>1){ updateProgress(f.id,"retry",total); await sleep(600*attempt); }
+      const res=await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`,{headers:{Authorization:"Bearer "+accessToken}});
+      if(res.status===401){ if(await silentAuth()){ continue; }else break; }
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const blob=await res.blob(); updateProgress(f.id,"done",total); return new File([blob],f.name,{type:blob.type||"application/pdf"});
+    }catch(e){ if(attempt===MAX_RETRY){ updateProgress(f.id,"error",total); return null; } }
   }
+  return null;
 }
+async function downloadParallel(files){ const results=new Array(files.length).fill(null); const queue=files.map((f,i)=>({f,i})); const workers=Array.from({length:MAX_PARALLEL},async()=>{ while(queue.length){ const {f,i}=queue.shift(); results[i]=await downloadFile(f,files.length); } }); await Promise.all(workers); return results.filter(Boolean); }
 
-function saveHistory() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-50)));
-  } catch {}
-}
-
-function loadHistory() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      messages = JSON.parse(saved);
-      messages.forEach(m => addMsg(m.role === "user" ? "user" : "bot", m.content));
-    }
-  } catch {}
-}
-
-function clearChat() {
-  if (!confirm("تمسح كل المحادثة؟")) return;
-  chat.innerHTML = '<div class="msg system">مرحباً بك في Big Pickle 🥒 اسألني عن أي شيء</div>';
-  messages = [];
-  localStorage.removeItem(STORAGE_KEY);
-}
-
-function handleKey(e) {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMsg();
+// DELETE
+async function deleteDriveFile(id){ try{ await gapi.client.drive.files.delete({fileId:id}); return true; }catch(e){ console.error("Delete error:",e); toast("خطأ: "+(e.result?.error?.message||e.status||"غير معروف")); return false; } }
+window.deleteSingleFile = async function(id,name){
+  if(!confirm(`حذف "${name}"؟`)) return;
+  toast("جاري الحذف...");
+  if(await deleteDriveFile(id)){ currentFiles=currentFiles.filter(f=>f.id!==id); applySearch(); toast(`تم حذف "${name}" ✅`); }
+  else toast("فشل الحذف ❌");
+};
+window.deleteAllFiles = async function(){
+  if(!confirm("⚠️ حذف كل ملفات PDF من Google Drive؟\nهذا الإجراء نهائي!")) return;
+  toast("جاري حذف الكل...");
+  let ok=0,fail=0;
+  for(const f of currentFiles){
+    if(f.mimeType==="application/vnd.google-apps.folder") continue;
+    if(await deleteDriveFile(f.id)){ ok++; currentFiles=currentFiles.filter(c=>c.id!==f.id); }
+    else fail++;
   }
-}
-function autoResize(el) {
-  el.style.height = "auto";
-  el.style.height = Math.min(el.scrollHeight, 120) + "px";
-}
-input.focus();
-
-function showToast(msg) {
-  toast.textContent = msg;
-  toast.classList.add("show");
-  clearTimeout(window._tt);
-  window._tt = setTimeout(() => toast.classList.remove("show"), 2500);
-}
-
-document.getElementById("apiModal").addEventListener("click", function(e) {
-  if (e.target === this) hideApiModal();
-});
-document.getElementById("apiKeyInput").addEventListener("keydown", function(e) {
-  if (e.key === "Enter") saveApiKey();
-});
-
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
+  applySearch();
+  if(fail) toast(`✅ ${ok}، ❌ ${fail}`);
+  else toast(`تم حذف ${ok} ملف ✅`);
+};
+window.deleteSelected = async function(){
+  const toDel=filteredFiles.filter(f=>selectedIds.has(f.id)); if(!toDel.length) return;
+  if(!confirm(`حذف ${toDel.length} ملف؟`)) return;
+  let ok=0,fail=0;
+  for(const f of toDel){
+    toast(`جاري حذف "${f.name}"...`);
+    if(await deleteDriveFile(f.id)){ ok++; selectedIds.delete(f.id); currentFiles=currentFiles.filter(c=>c.id!==f.id); }
+    else fail++;
+  }
+  applySearch(); updateSendBtn();
+  if(fail) toast(`✅ ${ok}، ❌ ${fail}`);
+  else toast(`تم حذف ${ok} ملف ✅`);
 }
 
-window.showApiModal = showApiModal;
-window.hideApiModal = hideApiModal;
-window.saveApiKey = saveApiKey;
-window.toggleTheme = toggleTheme;
-window.sendMsg = sendMsg;
-window.clearChat = clearChat;
-window.handleKey = handleKey;
-window.autoResize = autoResize;
-window.copyCode = copyCode;
+function showLogin(){ document.getElementById("loginCard").style.display="flex"; document.getElementById("filesList").style.display="none"; document.getElementById("toolbar").classList.remove("show"); document.getElementById("statsBar").classList.remove("show"); document.getElementById("searchBar").classList.remove("show"); document.getElementById("backBtn").style.display="none"; }
+function showLoading(){ const w=document.getElementById("filesList"); w.style.display="block"; w.innerHTML=[1,2,3,4,5].map(()=>'<div class="skeleton"></div>').join(""); document.getElementById("loginCard").style.display="none"; }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function fmt(b){ if(b<1024) return b+" B"; if(b<1048576) return (b/1024).toFixed(1)+" KB"; if(b<1073741824) return (b/1048576).toFixed(1)+" MB"; return (b/1073741824).toFixed(1)+" GB"; }
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+window.onload=initGapi;
 </script>
 </body>
 </html>
