@@ -159,7 +159,10 @@ html{min-height:100dvh;background:var(--bg)!important}body{min-height:100dvh;bac
     </div>
     <div style="display:flex;gap:8px;align-items:center">
       <span class="refresh-badge" id="refreshBadge">--</span>
-      <button class="icon-btn" id="darkBtn" onclick="toggleDark()">🌙</button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+        <button class="icon-btn" id="darkBtn" onclick="toggleDark()">🌙</button>
+        <span class="version" style="font-size:10px;font-weight:700;color:var(--sub)">v5</span>
+      </div>
     </div>
   </div>
 
@@ -200,13 +203,11 @@ html{min-height:100dvh;background:var(--bg)!important}body{min-height:100dvh;bac
 
 <div class="bottom-bar" id="bottomBarDelete" style="display:none">
   <div class="bottom-wrap">
-    <span class="version" style="font-size:12px;font-weight:700;color:var(--sub);padding:9px 4px">v5</span>
     <button class="btn btn-danger" onclick="deleteAllFiles()">🗑️ حذف الكل</button>
   </div>
 </div>
 <div class="bottom-bar" id="bottomBar" style="display:none">
   <div class="bottom-wrap">
-    <span class="version" style="font-size:12px;font-weight:700;color:var(--sub);padding:9px 4px">v5</span>
     <button class="btn btn-secondary" onclick="clearSel()">إلغاء</button>
     <button class="btn btn-primary" id="sendBtn" onclick="sendSelected()" disabled>إرسال المحدد</button>
   </div>
